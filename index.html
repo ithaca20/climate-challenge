@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기후행동 챌린지 🌍</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-text-fill-color: unset !important; }
+html, body { font-family: 'Noto Sans KR', sans-serif; background: #07111f !important; color: #e2f0e8 !important; min-height: 100vh; overflow-x: hidden; }
+p,div,span,h1,h2,h3,h4,label,li,button { color: inherit; }
+input, textarea {
+  background: rgba(255,255,255,.1) !important; border: 1px solid rgba(255,255,255,.22) !important;
+  border-radius: 10px !important; color: #fff !important; -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important; font-family: inherit !important; font-size: 14px;
+  padding: .65rem .9rem; outline: none; transition: border-color .2s; width: 100%;
+}
+input::placeholder, textarea::placeholder { color: rgba(255,255,255,.35) !important; -webkit-text-fill-color: rgba(255,255,255,.35) !important; }
+input:focus, textarea:focus { border-color: #6ee7a0 !important; }
+textarea { resize: none; }
+button { font-family: inherit !important; cursor: pointer; transition: all .2s; border: none; }
+
+.screen { display: none; min-height: 100vh; flex-direction: column; position: relative; z-index: 1; }
+.screen.active { display: flex; }
+
+#starfield { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+.star { position: absolute; background: #fff; border-radius: 50%; }
+
+/* ── 버튼 ── */
+.btn-primary {
+  display: block; width: 100%; padding: .82rem;
+  background: #1a7a40 !important; border: 2px solid #2ecc71 !important;
+  border-radius: 12px; color: #fff !important; -webkit-text-fill-color: #fff !important;
+  font-size: 15px; font-weight: 700; margin-top: .5rem; text-align: center;
+}
+.btn-primary:hover { background: #27ae60 !important; transform: translateY(-2px); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+.btn-inline {
+  display: inline-block; padding: .5rem 1.4rem;
+  background: #1a7a40 !important; border: 2px solid #2ecc71 !important;
+  border-radius: 10px; color: #fff !important; -webkit-text-fill-color: #fff !important;
+  font-size: 13px; font-weight: 700;
+}
+.btn-inline:hover { background: #27ae60 !important; transform: translateY(-2px); }
+.btn-inline:disabled { opacity: .35; cursor: not-allowed; transform: none !important; }
+.btn-ghost {
+  background: rgba(255,255,255,.1) !important; border: 1px solid rgba(255,255,255,.22) !important;
+  border-radius: 8px; padding: .3rem .75rem;
+  color: #fff !important; -webkit-text-fill-color: #fff !important; font-size: 12px; font-weight: 600;
+}
+.btn-ghost:hover { background: rgba(255,255,255,.2) !important; }
+.btn-icon {
+  background: rgba(255,255,255,.08) !important; border: 1px solid rgba(255,255,255,.16) !important;
+  border-radius: 50%; width: 42px; height: 42px; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-icon:hover { background: rgba(110,231,160,.2) !important; border-color: #6ee7a0 !important; transform: scale(1.08); }
+
+/* ── 카드 ── */
+.card { background: #0f2035 !important; border: 1px solid rgba(255,255,255,.1) !important; border-radius: 18px; padding: 1.2rem; }
+
+/* ── 뱃지 ── */
+.badge-green { background: rgba(110,231,160,.15) !important; border: 1px solid rgba(110,231,160,.3) !important; border-radius: 20px; padding: .22rem .7rem; font-size: 12px; color: #6ee7a0 !important; font-weight: 600; }
+.badge-gray { background: rgba(255,255,255,.08) !important; border-radius: 20px; padding: .22rem .7rem; font-size: 12px; color: rgba(255,255,255,.7) !important; }
+
+/* ── 오버레이 ── */
+.overlay-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+.overlay-bg.open { display: flex; }
+.overlay-card { background: #0d1f35 !important; border: 1px solid rgba(110,231,160,.28) !important; border-radius: 20px; padding: 1.4rem; width: 100%; max-width: 370px; max-height: 82vh; overflow-y: auto; animation: popIn .2s cubic-bezier(.34,1.56,.64,1); }
+@keyframes popIn { from{transform:scale(.9);opacity:0} to{transform:scale(1);opacity:1} }
+.overlay-hd { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.overlay-info { display: flex; align-items: center; gap: 10px; }
+.overlay-title { font-size: 14px; font-weight: 700; color: #6ee7a0 !important; }
+.overlay-sub { font-size: 11px; color: rgba(255,255,255,.5) !important; }
+.btn-close { background: rgba(255,255,255,.12) !important; border: 1px solid rgba(255,255,255,.25) !important; color: #fff !important; -webkit-text-fill-color: #fff !important; width: 28px; height: 28px; border-radius: 7px; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.btn-close:hover { background: rgba(255,255,255,.25) !important; }
+
+/* ── 확인 다이얼로그 ── */
+#confirmOverlay .overlay-card { max-width: 320px; text-align: center; border-color: rgba(255,255,255,.2) !important; }
+.confirm-msg { font-size: 13px; color: #fff !important; line-height: 1.65; margin-bottom: 1.2rem; white-space: pre-line; }
+.confirm-btns { display: flex; gap: 8px; justify-content: center; }
+.confirm-ok { padding: .6rem 1.6rem; border-radius: 9px; color: #fff !important; -webkit-text-fill-color: #fff !important; font-size: 13px; font-weight: 700; border: 2px solid; }
+.confirm-cancel { padding: .6rem 1.6rem; border-radius: 9px; background: rgba(255,255,255,.1) !important; border: 1px solid rgba(255,255,255,.25) !important; color: #fff !important; -webkit-text-fill-color: #fff !important; font-size: 13px; font-weight: 600; }
+.confirm-cancel:hover { background: rgba(255,255,255,.2) !important; }
+
+/* ── 토스트 ── */
+#toast { position: fixed; bottom: 1.6rem; left: 50%; transform: translateX(-50%) translateY(60px); background: #27ae60 !important; color: #fff !important; padding: .6rem 1.4rem; border-radius: 30px; font-size: 13px; font-weight: 700; z-index: 999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; white-space: nowrap; }
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── 저장 상태 ── */
+#storageSt { position: fixed; top: .5rem; right: .6rem; z-index: 100; font-size: 10px; color: rgba(255,255,255,.4) !important; background: rgba(0,0,0,.4) !important; padding: .2rem .5rem; border-radius: 6px; transition: opacity .6s; }
+
+/* ── 로그인 ── */
+#loginScreen { align-items: center; justify-content: center; padding: 2rem; }
+.login-box { background: #0f2035 !important; border: 1px solid rgba(255,255,255,.13) !important; border-radius: 24px; padding: 2.4rem; width: 100%; max-width: 390px; text-align: center; }
+.earth-logo { font-size: 68px; display: block; animation: floatY 3s ease-in-out infinite; margin-bottom: .3rem; }
+@keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+.login-title { font-size: 22px; font-weight: 900; color: #6ee7a0 !important; margin-bottom: .2rem; }
+.login-subtitle { font-size: 12px; color: rgba(255,255,255,.45) !important; margin-bottom: 2rem; }
+.field { text-align: left; margin-bottom: 1rem; }
+.field label { font-size: 11px; color: rgba(255,255,255,.65) !important; display: block; margin-bottom: .35rem; font-weight: 600; }
+.err-msg { color: #ff7675 !important; font-size: 12px; margin-top: .7rem; min-height: 18px; }
+.teacher-link { display: block; margin-top: 1rem; font-size: 12px; color: rgba(255,255,255,.4) !important; cursor: pointer; text-decoration: underline; }
+.teacher-link:hover { color: rgba(255,255,255,.75) !important; }
+
+/* ── 비번변경 ── */
+#pwScreen { align-items: center; justify-content: center; padding: 2rem; }
+
+/* ── 동물선택 ── */
+#charScreen { padding: 1.3rem; }
+.char-select-wrap { max-width: 580px; margin: 0 auto; width: 100%; }
+.page-hd { text-align: center; margin-bottom: 1.2rem; }
+.page-hd h2 { font-size: 18px; font-weight: 900; color: #6ee7a0 !important; }
+.page-hd p { font-size: 12px; color: rgba(255,255,255,.45) !important; margin-top: .2rem; }
+.animal-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 1.2rem; }
+.a-card { background: #0f2035 !important; border: 2px solid rgba(255,255,255,.12) !important; border-radius: 12px; padding: .6rem .2rem; text-align: center; cursor: pointer; transition: all .2s; }
+.a-card:hover { border-color: #6ee7a0 !important; background: rgba(110,231,160,.1) !important; transform: scale(1.05); }
+.a-card.sel { border-color: #6ee7a0 !important; background: rgba(110,231,160,.18) !important; }
+.a-emoji { font-size: 26px; display: block; margin-bottom: .2rem; }
+.a-name { font-size: 9px; color: rgba(255,255,255,.78) !important; font-weight: 600; }
+
+/* ── 메인 ── */
+#mainScreen { padding: .9rem 1rem 2rem; max-width: 580px; margin: 0 auto; width: 100%; }
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.topbar-left { display: flex; align-items: center; gap: 6px; }
+.topbar-right { display: flex; align-items: center; gap: 7px; }
+
+/* ── 캐릭터 카드 ── */
+.char-card { position: relative; text-align: center; margin-bottom: 1rem; }
+.stage-badge-tl { position: absolute; top: .75rem; left: .85rem; font-size: 10px; font-weight: 700; color: #6ee7a0 !important; background: rgba(110,231,160,.13) !important; border: 1px solid rgba(110,231,160,.28) !important; border-radius: 6px; padding: .15rem .45rem; }
+.animal-wrap { position: relative; width: 128px; height: 128px; margin: 0 auto .6rem; display: flex; align-items: center; justify-content: center; }
+.ring-svg { position: absolute; top:0; left:0; width:128px; height:128px; }
+.animal-emoji { position: relative; z-index: 2; line-height: 1; transition: font-size .6s cubic-bezier(.34,1.56,.64,1); }
+.s0{font-size:28px;animation:anim0 2.5s ease-in-out infinite}
+.s1{font-size:36px;animation:anim1 2s ease-in-out infinite}
+.s2{font-size:46px;animation:anim2 2.2s ease-in-out infinite}
+.s3{font-size:58px;animation:anim3 1.8s ease-in-out infinite}
+.s4{font-size:70px;animation:anim4 2.5s ease-in-out infinite}
+@keyframes anim0{0%,100%{transform:scale(1) rotate(-4deg)}30%{transform:scale(1.1) rotate(4deg)}60%{transform:scale(.93) rotate(-2deg)}}
+@keyframes anim1{0%,100%{transform:translateY(0) scale(1)}40%{transform:translateY(-6px) scale(1.06)}70%{transform:translateY(2px) scale(.96)}}
+@keyframes anim2{0%,100%{transform:scale(1) rotate(-1.5deg)}50%{transform:scale(1.07) rotate(1.5deg)}}
+@keyframes anim3{0%,100%{transform:translateX(0) scale(1)}25%{transform:translateX(-5px) scale(1.03)}75%{transform:translateX(5px) scale(1.03)}}
+@keyframes anim4{0%,100%{transform:scale(1) translateY(0)}33%{transform:scale(1.05) translateY(-4px)}66%{transform:scale(.97) translateY(2px)}}
+.char-name { font-size: 15px; font-weight: 700; color: #6ee7a0 !important; margin-bottom: .1rem; }
+.char-progress-text { font-size: 11px; color: rgba(255,255,255,.55) !important; margin-bottom: .7rem; }
+.prog-bar-wrap { background: rgba(255,255,255,.09) !important; border-radius: 20px; height: 8px; overflow: hidden; margin-bottom: .3rem; }
+.prog-bar-fill { height: 100%; background: linear-gradient(90deg,#1a7a40,#6ee7a0); border-radius: 20px; transition: width .9s cubic-bezier(.34,1.56,.64,1); }
+.prog-bar-lbl { display: flex; justify-content: space-between; font-size: 10px; color: rgba(255,255,255,.45) !important; }
+
+/* ── 도감 탭 ── */
+.dex-tabs { display: flex; gap: 5px; margin: .9rem 0 .6rem; overflow-x: auto; padding-bottom: 2px; }
+.dex-tab { flex-shrink: 0; padding: .28rem .65rem; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,.13) !important; background: rgba(255,255,255,.06) !important; color: rgba(255,255,255,.58) !important; transition: all .18s; }
+.dex-tab:hover { background: rgba(255,255,255,.12) !important; }
+.dex-tab.active { background: rgba(110,231,160,.18) !important; border-color: #6ee7a0 !important; color: #6ee7a0 !important; }
+.dex-tab:disabled { opacity: .3; cursor: not-allowed; }
+
+/* ── 도감 패널 ── */
+.dex-panel { background: rgba(255,255,255,.04) !important; border: 1px solid rgba(255,255,255,.08) !important; border-radius: 12px; padding: .85rem; text-align: left; }
+.dex-desc { font-size: 12px; color: rgba(255,255,255,.8) !important; line-height: 1.65; margin-bottom: .75rem; }
+.dex-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: .7rem; }
+.dex-fact { background: rgba(255,255,255,.06) !important; border-radius: 8px; padding: .45rem .6rem; }
+.dex-fact-lbl { font-size: 9px; color: rgba(255,255,255,.42) !important; margin-bottom: 1px; }
+.dex-fact-val { font-size: 11px; font-weight: 600; color: #fff !important; }
+.dex-tip { background: rgba(110,231,160,.07) !important; border: 1px solid rgba(110,231,160,.2) !important; border-radius: 8px; padding: .5rem .7rem; }
+.dex-tip-lbl { font-size: 9px; font-weight: 700; color: #6ee7a0 !important; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .4px; }
+.dex-tip-txt { font-size: 11px; color: rgba(255,255,255,.8) !important; line-height: 1.55; }
+
+/* ── 완료 배너 ── */
+.done-banner { background: rgba(110,231,160,.09) !important; border: 1px solid rgba(110,231,160,.22) !important; border-radius: 11px; padding: .75rem 1rem; display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; font-size: 12px; color: #6ee7a0 !important; }
+
+/* ── 챌린지 입력 ── */
+.challenge-card { margin-bottom: 1rem; }
+.card-title { font-size: 13px; font-weight: 700; color: #6ee7a0 !important; margin-bottom: .7rem; display: flex; align-items: center; gap: 5px; }
+.btn-submit { display: block; width: 100%; padding: .78rem; background: #1a7a40 !important; border: 2px solid #2ecc71 !important; border-radius: 12px; color: #fff !important; -webkit-text-fill-color: #fff !important; font-size: 14px; font-weight: 700; margin-top: .75rem; text-align: center; }
+.btn-submit:hover { background: #27ae60 !important; transform: translateY(-2px); }
+.btn-submit:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+
+/* ── 땅콩이 ── */
+.peanut-box { display: none; margin-bottom: 1rem; animation: fadeUp .4s ease; }
+.peanut-box.show { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.pnut-hd { display: flex; align-items: center; gap: 8px; margin-bottom: .85rem; }
+.pnut-hd-name { font-size: 13px; font-weight: 700; color: #f9ca24 !important; }
+.pnut-sec { margin-bottom: .7rem; padding: .72rem .85rem; border-radius: 10px; background: rgba(255,255,255,.04) !important; border-left: 3px solid; }
+.pnut-sec.p1{border-color:#f9ca24} .pnut-sec.p2{border-color:#74b9ff} .pnut-sec.p3{border-color:#6ee7a0}
+.pnut-lbl { font-size: 9px; font-weight: 700; margin-bottom: .28rem; letter-spacing: .4px; text-transform: uppercase; }
+.p1 .pnut-lbl{color:#f9ca24!important} .p2 .pnut-lbl{color:#74b9ff!important} .p3 .pnut-lbl{color:#6ee7a0!important}
+.pnut-sec p { font-size: 12px; line-height: 1.65; color: rgba(255,255,255,.88) !important; }
+.loading-anim { text-align: center; padding: 1.3rem; color: rgba(255,255,255,.55) !important; font-size: 12px; }
+.dots-wrap { display: inline-flex; gap: 3px; margin-left: 4px; }
+.dots-wrap span { width: 5px; height: 5px; border-radius: 50%; background: #f9ca24; display: inline-block; animation: dotBounce .8s infinite; }
+.dots-wrap span:nth-child(2){animation-delay:.15s} .dots-wrap span:nth-child(3){animation-delay:.3s}
+@keyframes dotBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* ── 기록 ── */
+.hist-card { margin-bottom: 1rem; }
+.hist-item { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; gap: 8px; align-items: flex-start; }
+.hist-item:last-child { border-bottom: none; }
+.hist-day { background: rgba(110,231,160,.11) !important; border: 1px solid rgba(110,231,160,.22) !important; color: #6ee7a0 !important; font-size: 9px; font-weight: 700; padding: .12rem .38rem; border-radius: 5px; flex-shrink: 0; margin-top: 1px; }
+.hist-txt { font-size: 11px; color: rgba(255,255,255,.72) !important; line-height: 1.55; }
+.hist-date { font-size: 9px; color: rgba(255,255,255,.3) !important; margin-top: 1px; }
+
+/* ── 지구 화면 ── */
+#globeScreen { flex-direction: column; background: #050e1a !important; }
+.globe-hd { background: rgba(5,14,26,.92) !important; border-bottom: 1px solid rgba(255,255,255,.07); padding: .82rem 1rem; display: flex; align-items: center; gap: 9px; position: sticky; top: 0; z-index: 10; }
+.globe-hd-title { font-size: 15px; font-weight: 700; color: #6ee7a0 !important; }
+.earth-scene { display: flex; flex-direction: column; align-items: center; padding: 1.5rem 1rem 2rem; }
+.earth-icon { font-size: 88px; animation: earthBreath 6s ease-in-out infinite; filter: drop-shadow(0 0 18px rgba(110,231,160,.25)); margin-bottom: 1rem; }
+@keyframes earthBreath{0%,100%{transform:scale(1) rotate(0deg)}25%{transform:scale(1.03) rotate(3deg)}75%{transform:scale(1.01) rotate(-2deg)}}
+.globe-note { font-size: 11px; color: rgba(255,255,255,.45) !important; margin-bottom: 1rem; text-align: center; }
+.globe-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; width: 100%; max-width: 480px; }
+.ga-card { background: rgba(255,255,255,.07) !important; border: 1px solid rgba(255,255,255,.1) !important; border-radius: 11px; padding: .55rem .25rem; text-align: center; cursor: pointer; transition: all .2s; position: relative; }
+.ga-card:hover { border-color: #6ee7a0 !important; background: rgba(110,231,160,.12) !important; transform: scale(1.07); z-index: 5; }
+.ga-card.is-me { border-color: #f9ca24 !important; box-shadow: 0 0 8px rgba(249,202,36,.25); }
+.ga-card.has-entries { border-color: rgba(110,231,160,.38) !important; }
+.ga-emoji { font-size: 22px; display: block; }
+.ga-num { font-size: 9px; color: rgba(255,255,255,.55) !important; margin-top: 1px; }
+.ga-count { position: absolute; top: -3px; right: -3px; background: #27ae60 !important; color: #fff !important; font-size: 8px; font-weight: 700; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.entry-item { padding: .65rem .7rem; background: rgba(255,255,255,.05) !important; border-radius: 9px; margin-bottom: .5rem; border-left: 2px solid rgba(110,231,160,.38); }
+.entry-day { font-size: 9px; color: #6ee7a0 !important; font-weight: 700; margin-bottom: .22rem; }
+.entry-txt { font-size: 12px; color: rgba(255,255,255,.82) !important; line-height: 1.5; }
+.entry-dt { font-size: 9px; color: rgba(255,255,255,.32) !important; margin-top: .2rem; }
+.no-entry { text-align: center; padding: 1.5rem; color: rgba(255,255,255,.38) !important; font-size: 12px; }
+
+/* ── 교사 화면 ── */
+#teacherScreen { flex-direction: column; background: #07111f !important; }
+.teacher-hd { background: rgba(110,60,0,.28) !important; border-bottom: 1px solid rgba(255,179,71,.2); padding: .82rem 1rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.teacher-hd-title { font-size: 15px; font-weight: 700; color: #ffb347 !important; }
+.teacher-body { padding: 1rem; max-width: 620px; margin: 0 auto; width: 100%; }
+.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 1.2rem; }
+.stat-box { background: #0f2035 !important; border: 1px solid rgba(255,255,255,.1) !important; border-radius: 12px; padding: .85rem; text-align: center; }
+.stat-num { font-size: 24px; font-weight: 700; color: #6ee7a0 !important; }
+.stat-lbl { font-size: 10px; color: rgba(255,255,255,.55) !important; margin-top: .2rem; }
+.t-section-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.8) !important; margin-bottom: .7rem; }
+.stu-row { display: flex; align-items: center; gap: 8px; padding: .55rem .72rem; background: #0f2035 !important; border: 1px solid rgba(255,255,255,.09) !important; border-radius: 10px; margin-bottom: .4rem; }
+.stu-emoji { font-size: 20px; flex-shrink: 0; }
+.stu-info { flex: 1; min-width: 0; }
+.stu-name { font-size: 12px; font-weight: 600; color: #fff !important; }
+.stu-sub { font-size: 10px; color: rgba(255,255,255,.48) !important; }
+.stu-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.act-btn { font-size: 10px; padding: .28rem .55rem; border-radius: 6px; font-weight: 700; border: 1px solid; }
+.act-btn.reset{color:#f9ca24!important;-webkit-text-fill-color:#f9ca24!important;border-color:rgba(249,202,36,.45)!important;background:rgba(249,202,36,.1)!important}
+.act-btn.reset:hover{background:rgba(249,202,36,.25)!important}
+.act-btn.edit{color:#74b9ff!important;-webkit-text-fill-color:#74b9ff!important;border-color:rgba(116,185,255,.45)!important;background:rgba(116,185,255,.1)!important}
+.act-btn.edit:hover{background:rgba(116,185,255,.25)!important}
+.act-btn.del{color:#ff7675!important;-webkit-text-fill-color:#ff7675!important;border-color:rgba(255,118,117,.45)!important;background:rgba(255,118,117,.1)!important}
+.act-btn.del:hover{background:rgba(255,118,117,.25)!important}
+.edit-entry-item { display: flex; align-items: flex-start; gap: 7px; padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+.edit-entry-item:last-child { border-bottom: none; }
+.edit-entry-txt { flex: 1; font-size: 12px; color: rgba(255,255,255,.8) !important; line-height: 1.55; }
+.del-entry-btn { flex-shrink: 0; background: rgba(255,118,117,.14) !important; border: 1px solid rgba(255,118,117,.35) !important; color: #ff7675 !important; -webkit-text-fill-color: #ff7675 !important; font-size: 10px; padding: .22rem .48rem; border-radius: 6px; font-weight: 700; }
+.del-entry-btn:hover { background: rgba(255,118,117,.28) !important; }
+.add-entry-area { margin-top: .9rem; padding-top: .9rem; border-top: 1px solid rgba(255,255,255,.1); }
+.add-entry-lbl { font-size: 11px; color: rgba(255,255,255,.6) !important; margin-bottom: .4rem; }
+</style>
+</head>
+<body>
+
+<div id="starfield"></div>
+<div id="toast"></div>
+<div id="storageSt">💾 로딩 중...</div>
+
+<!-- 확인 다이얼로그 -->
+<div class="overlay-bg" id="confirmOverlay">
+  <div class="overlay-card">
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="resolveConfirm(false)">취소</button>
+      <button class="confirm-ok" id="confirmOkBtn" onclick="resolveConfirm(true)">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 로그인 -->
+<div class="screen active" id="loginScreen">
+  <div class="login-box" style="margin:auto">
+    <span class="earth-logo">🌍</span>
+    <div class="login-title">기후행동 챌린지</div>
+    <div class="login-subtitle">우리 반 30일 지구 지킴이 프로젝트</div>
+    <div class="field"><label>내 번호 (0~24)</label><input type="number" id="loginNum" min="0" max="24" placeholder="번호 입력 (0번: 선생님 참여)"/></div>
+    <div class="field"><label>비밀번호 (숫자 4자리)</label><input type="password" id="loginPw" maxlength="4" inputmode="numeric" placeholder="0000"/></div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()" disabled>로딩 중...</button>
+    <div class="err-msg" id="loginErr"></div>
+    <span class="teacher-link" onclick="openOverlay('teacherLoginOverlay')">선생님 로그인 (관리)</span>
+  </div>
+</div>
+
+<!-- 교사 관리 로그인 오버레이 -->
+<div class="overlay-bg" id="teacherLoginOverlay">
+  <div class="overlay-card" style="border-color:rgba(255,179,71,.35)!important">
+    <div class="overlay-hd">
+      <div class="overlay-info"><span style="font-size:30px">👩‍🏫</span><div><div class="overlay-title" style="color:#ffb347!important">교사 관리 로그인</div><div class="overlay-sub">관리자 전용</div></div></div>
+      <button class="btn-close" onclick="closeOverlay('teacherLoginOverlay')">✕</button>
+    </div>
+    <div class="field"><label>교사 비밀번호</label><input type="password" id="teacherPw" maxlength="20" placeholder="비밀번호 입력"/></div>
+    <button class="btn-primary" style="background:#7d5a00!important;border-color:#ffb347!important" onclick="doTeacherLogin()">입장</button>
+    <div class="err-msg" id="teacherErr"></div>
+  </div>
+</div>
+
+<!-- 비밀번호 변경 -->
+<div class="screen" id="pwScreen">
+  <div style="margin:auto;padding:2rem;width:100%;max-width:370px">
+    <div class="login-box" style="text-align:left">
+      <div style="font-size:34px;margin-bottom:.4rem">🔐</div>
+      <div style="font-size:17px;font-weight:700;color:#f9ca24!important;margin-bottom:.15rem">비밀번호 변경</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.5)!important;margin-bottom:1.4rem">처음 로그인이에요! 나만의 비밀번호를 만들어요.</div>
+      <div class="field"><label>새 비밀번호 (숫자 4자리)</label><input type="password" id="newPw1" maxlength="4" inputmode="numeric" placeholder="새 비밀번호"/></div>
+      <div class="field"><label>비밀번호 확인</label><input type="password" id="newPw2" maxlength="4" inputmode="numeric" placeholder="한 번 더 입력"/></div>
+      <button class="btn-primary" onclick="doPwChange()">변경하기</button>
+      <div class="err-msg" id="pwErr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 동물 선택 -->
+<div class="screen" id="charScreen">
+  <div class="char-select-wrap" style="padding:1.3rem">
+    <div class="page-hd"><h2>🦁 내 동물 선택</h2><p>나를 대신할 멸종위기 동물을 골라봐요!</p></div>
+    <div class="animal-grid" id="animalGrid"></div>
+    <button class="btn-inline" id="selectBtn" disabled onclick="doSelectAnimal()" style="display:block;margin:0 auto">이 동물로 시작하기 🌱</button>
+  </div>
+</div>
+
+<!-- 메인 -->
+<div class="screen" id="mainScreen">
+  <div class="topbar">
+    <div class="topbar-left"><span class="badge-green" id="stuBadge">0번</span><span class="badge-gray" id="dayBadge">📅 1일차</span></div>
+    <div class="topbar-right"><button class="btn-icon" onclick="goGlobe()">🌍</button><button class="btn-ghost" onclick="doLogout()">나가기</button></div>
+  </div>
+  <div class="card char-card" id="charCard">
+    <div class="stage-badge-tl" id="stageLbl">알</div>
+    <div class="animal-wrap">
+      <svg class="ring-svg" viewBox="0 0 128 128">
+        <circle cx="64" cy="64" r="56" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="5"/>
+        <circle id="ringArc" cx="64" cy="64" r="56" fill="none" stroke="#6ee7a0" stroke-width="5" stroke-linecap="round" stroke-dasharray="351.9" stroke-dashoffset="351.9" transform="rotate(-90 64 64)" style="transition:stroke-dashoffset .9s cubic-bezier(.34,1.56,.64,1)"/>
+      </svg>
+      <span class="animal-emoji s0" id="animalEmoji">🥚</span>
+    </div>
+    <div class="char-name" id="charName">로딩 중...</div>
+    <div class="char-progress-text" id="charProgressTxt">첫 실천을 기다리고 있어요 🌱</div>
+    <div class="prog-bar-wrap"><div class="prog-bar-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-bar-lbl"><span>성장도</span><span id="progLbl">0 / 30회</span></div>
+    <div class="dex-tabs" id="dexTabs"></div>
+    <div class="dex-panel" id="dexPanel"></div>
+  </div>
+  <div class="done-banner" id="doneBanner" style="display:none">✅ 오늘 챌린지 완료! 내일도 지구를 지켜요 💚</div>
+  <div class="peanut-box card" id="pnutBox">
+    <div class="pnut-hd"><span style="font-size:26px">🥜</span><span class="pnut-hd-name">땅콩이의 응원!</span></div>
+    <div id="pnutContent"></div>
+  </div>
+  <div class="card challenge-card" id="challengeCard">
+    <div class="card-title">🌿 오늘의 기후행동 실천</div>
+    <textarea id="chalInput" rows="4" placeholder="오늘 어떤 기후행동을 실천했나요?&#10;예: 양치할 때 컵을 사용했어요, 급식을 남기지 않았어요..."></textarea>
+    <button class="btn-submit" id="submitBtn" onclick="doSubmit()">실천 완료! 땅콩이에게 보고하기 🥜</button>
+  </div>
+  <div class="card hist-card">
+    <div class="card-title">📖 내 실천 기록</div>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<!-- 지구 화면 -->
+<div class="screen" id="globeScreen">
+  <div class="globe-hd"><button class="btn-ghost" onclick="goBack()">← 돌아가기</button><div class="globe-hd-title">🌍 우리 반 지구</div></div>
+  <div class="earth-scene">
+    <div class="earth-icon">🌍</div>
+    <div class="globe-note">동물을 클릭하면 친구의 실천 내용을 볼 수 있어요!</div>
+    <div class="globe-grid" id="globeGrid"></div>
+  </div>
+  <div class="overlay-bg" id="detailOverlay" onclick="closeDetailOnBg(event)">
+    <div class="overlay-card">
+      <div class="overlay-hd">
+        <div class="overlay-info"><span style="font-size:36px" id="detEmoji"></span><div><div class="overlay-title" id="detName"></div><div class="overlay-sub" id="detSub"></div></div></div>
+        <button class="btn-close" onclick="closeOverlay('detailOverlay')">✕</button>
+      </div>
+      <div id="detEntries"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 교사 화면 -->
+<div class="screen" id="teacherScreen">
+  <div class="teacher-hd">
+    <div class="teacher-hd-title">👩‍🏫 교사 관리 패널</div>
+    <button class="btn-ghost" style="color:#ffb347!important;-webkit-text-fill-color:#ffb347!important;border-color:rgba(255,179,71,.35)!important" onclick="doLogout()">로그아웃</button>
+  </div>
+  <div class="teacher-body">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="t-section-title">📋 학생 목록 (0~24번)</div>
+    <div id="studentList"></div>
+  </div>
+  <div class="overlay-bg" id="tEditOverlay" onclick="closeTEditOnBg(event)">
+    <div class="overlay-card" style="border-color:rgba(116,185,255,.3)!important">
+      <div class="overlay-hd">
+        <div class="overlay-info"><span style="font-size:32px" id="tEditEmoji"></span><div><div class="overlay-title" id="tEditName" style="color:#74b9ff!important"></div><div class="overlay-sub" id="tEditSub"></div></div></div>
+        <button class="btn-close" onclick="closeOverlay('tEditOverlay')">✕</button>
+      </div>
+      <div id="tEditEntries"></div>
+      <div class="add-entry-area">
+        <div class="add-entry-lbl">✏️ 실천 기록 추가</div>
+        <textarea id="tAddInput" rows="2" placeholder="추가할 실천 내용 입력..."></textarea>
+        <button class="btn-inline" style="margin-top:.5rem" onclick="tAddEntry()">추가</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════
+   Supabase 설정
+════════════════════════════════════ */
+const SUPABASE_URL = 'https://jtxsnaevoubtmslgdjgf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_4DjLpm_jDWQXmi8d0KlZ4A_UJ3stA-9';
+const TEACHER_PW   = 'teacher1234';
+
+async function sbFetch(path, options = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(options.headers || {})
+    }
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function getStudent(id) {
+  const rows = await sbFetch(`students?id=eq.${id}&select=*`);
+  return rows && rows[0] ? rows[0] : null;
+}
+
+async function updateStudent(id, data) {
+  await sbFetch(`students?id=eq.${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data)
+  });
+}
+
+async function getAllStudents() {
+  return await sbFetch('students?select=*&order=id.asc');
+}
+
+/* ════════════════════════════════════
+   동물 & 성장 데이터
+════════════════════════════════════ */
+const ANIMALS = [
+  { e:'🦁', ko:'아무르표범', stages:[
+    { label:'알', desc:'아무르표범은 보호받는 굴 속에서 세상을 기다려요. 지구상에서 가장 희귀한 대형 고양이의 이야기가 시작돼요.', facts:[{l:'서식지',v:'러시아 극동·중국 동북부'},{l:'보전 상태',v:'위급(CR)'},{l:'현재 개체 수',v:'야생 약 100마리'},{l:'특징',v:'눈밭을 달리는 표범'}], tip:null },
+    { label:'새끼', desc:'눈도 뜨지 못한 채 태어나 어미 곁에서 젖을 먹으며 지내요. 얼룩무늬는 태어날 때부터 있어요.', facts:[{l:'임신 기간',v:'90~105일'},{l:'새끼 수',v:'1~3마리'},{l:'눈 뜨는 시기',v:'생후 약 9일'},{l:'어미 의존',v:'생후 2년'}], tip:'어미 표범은 새끼를 숨기기 위해 굴이나 바위 틈을 이용해요!' },
+    { label:'어린', desc:'나뭇가지 위에서 노는 것을 좋아해요. 사냥 기술을 어미에게 배우기 시작해요.', facts:[{l:'나무 오르기',v:'수직 암벽도 오를 수 있음'},{l:'먹이',v:'사슴·멧돼지·너구리'},{l:'특기',v:'먹이를 나무 위에 저장'},{l:'울음소리',v:'거친 톱질 소리'}], tip:'아무르표범은 먹이를 나무 위 7m 이상에 올려놓아요. 다른 포식자에게 빼앗기지 않으려는 전략이에요!' },
+    { label:'청소년', desc:'독립적으로 살아가기 시작해요. 영역을 표시하고 단독으로 사냥해요.', facts:[{l:'달리기 속도',v:'최대 60km/h'},{l:'점프 능력',v:'수직 3m·수평 6m'},{l:'영역 크기',v:'수컷 300km² 이상'},{l:'야행성',v:'주로 밤에 활동'}], tip:'두꺼운 털과 넓은 발바닥 덕분에 -30℃ 극한 추위에서도 살 수 있어요!' },
+    { label:'성체', desc:'완전히 자란 아무르표범이에요! 보전 노력 덕분에 개체 수가 조금씩 늘고 있어요.', facts:[{l:'몸무게',v:'수컷 최대 48kg'},{l:'수명',v:'야생 10~15년'},{l:'보호 구역',v:'러시아 표범의 땅 국립공원'},{l:'복원 현황',v:'30→100마리 이상'}], tip:'보전단체들의 노력으로 2000년대 초 30마리이던 개체가 100마리 이상으로 늘었어요!' }
+  ]},
+  { e:'🐘', ko:'수마트라코끼리', stages:[
+    { label:'알', desc:'수마트라코끼리는 무려 22개월의 임신 기간을 거쳐 태어나요.', facts:[{l:'서식지',v:'인도네시아 수마트라 섬'},{l:'보전 상태',v:'위급(CR)'},{l:'임신 기간',v:'약 22개월'},{l:'위협 요인',v:'팜유 농장 개발'}], tip:null },
+    { label:'새끼', desc:'태어나자마자 약 100kg! 무리의 모든 암컷이 함께 새끼를 돌봐요.', facts:[{l:'출생 체중',v:'약 90~100kg'},{l:'출생 신장',v:'약 90cm'},{l:'돌봄 방식',v:'암컷 무리 전체가 양육'},{l:'젖 먹는 기간',v:'최대 5년'}], tip:'아기 코끼리는 처음에 코 사용법을 몰라요! 코를 흔들고 밟으면서 천천히 배운답니다.' },
+    { label:'어린', desc:'코로 물을 빨아 목욕하는 법을 배워요. 코 근육은 무려 4만 개예요.', facts:[{l:'코 근육 수',v:'약 40,000개'},{l:'코의 역할',v:'호흡·냄새·집기·물 마시기'},{l:'하루 먹는 양',v:'약 150kg의 식물'},{l:'기억력',v:'수십 년 기억 가능'}], tip:'코끼리는 죽은 동료를 애도해요. 뼈 앞에 서서 오랫동안 떠나지 않는 행동이 관찰됐어요.' },
+    { label:'청소년', desc:'최고령 암컷(마트리아크)에게서 이동 경로, 물 찾는 법 등 생존 지식을 전수받아요.', facts:[{l:'무리 규모',v:'6~7마리 (암컷 중심)'},{l:'하루 이동 거리',v:'최대 50km'},{l:'물 소비량',v:'하루 약 150리터'},{l:'의사소통',v:'초저주파(인간 불감지)'}], tip:'코끼리는 발바닥으로 수십 km 떨어진 무리의 소리를 땅을 통해 감지해요!' },
+    { label:'성체', desc:'완전히 자란 수마트라코끼리예요. 팜유 제품을 줄이는 것이 이 코끼리를 도와요.', facts:[{l:'몸무게',v:'수컷 최대 5톤'},{l:'수명',v:'최대 70년'},{l:'현재 개체 수',v:'약 2,400~2,800마리'},{l:'보전 방법',v:'서식지 보호·순찰 강화'}], tip:'수마트라 섬 삼림의 절반 이상이 지난 25년간 사라졌어요. 팜유 제품을 줄이는 것이 코끼리를 도와요.' }
+  ]},
+  { e:'🦏', ko:'자바코뿔소', stages:[
+    { label:'알', desc:'현존 코뿔소 중 가장 희귀한 종이에요. 단 하나의 국립공원에만 살아요.', facts:[{l:'서식지',v:'인도네시아 자바 섬'},{l:'보전 상태',v:'위급(CR)'},{l:'현재 개체 수',v:'약 76마리(2024)'},{l:'유일 서식지',v:'우중쿨론 국립공원'}], tip:null },
+    { label:'새끼', desc:'뿔이 없이 태어나요. 어미와 함께 진흙 목욕으로 기생충을 없애요.', facts:[{l:'출생 체중',v:'약 40~60kg'},{l:'수유 기간',v:'약 1~2년'},{l:'독립 시기',v:'생후 약 2년'},{l:'주요 먹이',v:'낙엽·나무껍질·과일'}], tip:'코뿔소의 뿔은 뼈가 아닌 케라틴(손톱 성분)으로 이루어져 있어요. 잘려도 다시 자라요!' },
+    { label:'어린', desc:'시력은 약하지만 청각과 후각이 매우 발달했어요.', facts:[{l:'시력',v:'매우 약함(50m 한계)'},{l:'후각',v:'인간의 수백 배'},{l:'청각',v:'귀를 360° 회전'},{l:'야행성',v:'주로 새벽·밤에 활동'}], tip:'자바코뿔소는 수영을 잘해요! 바다를 헤엄쳐 섬 사이를 이동했다는 역사 기록도 있어요.' },
+    { label:'청소년', desc:'독립적인 생활을 시작해요. 영역 경계에 배설물로 표시를 해요.', facts:[{l:'영역 크기',v:'약 25km²'},{l:'영역 표시',v:'배설물·나무 긁기'},{l:'몸무게',v:'최대 1,400kg'},{l:'피부 두께',v:'약 2.5~5cm'}], tip:'코뿔소의 두꺼운 피부는 갑옷처럼 보이지만 사실 매우 민감해요.' },
+    { label:'성체', desc:'완전히 자란 자바코뿔소예요. 무인 카메라로 개체를 모니터링 중이에요.', facts:[{l:'몸무게',v:'최대 2,300kg'},{l:'뿔 길이',v:'최대 27cm'},{l:'복원 방법',v:'무인 카메라 모니터링'},{l:'연구 방법',v:'흙에서 DNA 분석'}], tip:'자바코뿔소는 너무 희귀해 과학자들도 보기 힘들어요. 무인 카메라로 생태를 연구해요!' }
+  ]},
+  { e:'🐯', ko:'아무르호랑이', stages:[
+    { label:'알', desc:'세계에서 가장 큰 고양이과 동물이에요. 혹한의 러시아 극동에서 살아남는 거대한 호랑이예요.', facts:[{l:'서식지',v:'러시아 극동·중국 동북부'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'특징',v:'-40℃에서도 생존'},{l:'복원 성공',v:'40→500마리 이상'}], tip:null },
+    { label:'새끼', desc:'어미와 함께 굴 속에서 자라요. 줄무늬는 개체마다 달라 지문 역할을 해요.', facts:[{l:'출생 체중',v:'약 0.8~1.6kg'},{l:'눈 뜨는 시기',v:'생후 약 14일'},{l:'줄무늬',v:'개체마다 모두 달라'},{l:'육아',v:'어미 혼자 양육'}], tip:'호랑이 줄무늬는 피부에도 있어요! 털을 밀어도 줄무늬가 남아있답니다.' },
+    { label:'어린', desc:'어미에게 사냥을 배우는 시기예요.', facts:[{l:'달리기 속도',v:'최대 80km/h (단거리)'},{l:'점프',v:'최대 10m 수평 도약'},{l:'수영',v:'물을 좋아해 강도 헤엄침'},{l:'야행성',v:'주로 새벽녘에 사냥'}], tip:'아무르호랑이는 먹이 감지를 위해 최대 20km를 이동하기도 해요!' },
+    { label:'청소년', desc:'혼자 사냥을 시작해요. 먹이를 눈 속에 숨겨 보관해요.', facts:[{l:'영역 크기',v:'수컷 최대 1,000km²'},{l:'먹이 보관',v:'눈 속에 덮어 저장'},{l:'하루 먹이',v:'약 10~12kg'},{l:'야간 시력',v:'인간의 6배'}], tip:'연구자들은 각기 다른 줄무늬 덕분에 카메라 트랩으로 개체를 구별해요.' },
+    { label:'성체', desc:'완전히 자란 아무르호랑이예요! 보전 노력으로 500마리 이상으로 회복됐어요.', facts:[{l:'몸무게',v:'수컷 최대 300kg'},{l:'수명',v:'야생 10~15년'},{l:'현재 개체 수',v:'야생 약 500~600마리'},{l:'상징',v:'러시아 극동의 심볼'}], tip:'1940년대 야생 아무르호랑이는 40마리까지 줄었어요. 지금은 500마리 이상! 보전의 힘이에요.' }
+  ]},
+  { e:'🐋', ko:'흰수염고래', stages:[
+    { label:'알', desc:'지구 역사상 가장 큰 동물이에요.', facts:[{l:'서식지',v:'전 세계 대양'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'최대 크기',v:'33.5m, 190톤'},{l:'심장 무게',v:'약 180kg'}], tip:null },
+    { label:'새끼', desc:'태어날 때부터 약 7m, 2.5톤! 매일 90kg씩 자라요.', facts:[{l:'출생 길이',v:'약 7m'},{l:'출생 체중',v:'약 2,500kg'},{l:'젖 지방 함량',v:'40~50%'},{l:'하루 성장',v:'약 90kg'}], tip:'아기 고래는 하루 400리터의 젖을 먹어요! 6개월 만에 15m 이상으로 자라요.' },
+    { label:'어린', desc:'하루에 최대 40억 마리의 크릴(작은 새우)을 먹어요!', facts:[{l:'먹이',v:'크릴'},{l:'하루 섭취량',v:'약 4~6톤'},{l:'먹이 방법',v:'수염판으로 걸러 먹기'},{l:'이동 거리',v:'연간 최대 20,000km'}], tip:'고래가 살아야 바다가, 바다가 살아야 지구가 살아요!' },
+    { label:'청소년', desc:'저주파 노래로 수천 km 떨어진 개체와 소통해요.', facts:[{l:'울음 소리',v:'188데시벨(세계 최고 음량)'},{l:'전달 거리',v:'수천 km'},{l:'수심',v:'최대 500m 잠수'},{l:'숨 참기',v:'최대 90분'}], tip:'흰수염고래 노래는 지구상에서 가장 큰 소리예요.' },
+    { label:'성체', desc:'완전히 자란 흰수염고래예요.', facts:[{l:'몸 길이',v:'최대 33.5m'},{l:'몸무게',v:'최대 190톤'},{l:'수명',v:'약 80~90년'},{l:'탄소 포집',v:'평생 수천 톤의 탄소 저장'}], tip:'고래 배설물에는 철분이 풍부해 식물성 플랑크톤이 잘 자라요. 고래 한 마리가 평생 수천 톤의 탄소를 저장해요!' }
+  ]},
+  { e:'🦈', ko:'고래상어', stages:[
+    { label:'알', desc:'세계 최대의 물고기예요.', facts:[{l:'서식지',v:'열대·온대 대양'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'최대 크기',v:'18m, 20톤'},{l:'수명',v:'약 70~130년'}], tip:null },
+    { label:'새끼', desc:'약 60cm로 태어나 처음부터 스스로 먹이를 찾아요.', facts:[{l:'출생 크기',v:'약 55~65cm'},{l:'무늬',v:'개체마다 고유한 점박이'},{l:'연구 활용',v:'무늬로 개체 식별'},{l:'초기 먹이',v:'동물성 플랑크톤'}], tip:'고래상어 무늬는 위성 사진 별자리 패턴 인식 기술로 개체를 구별해요!' },
+    { label:'어린', desc:'넓은 입을 벌려 바닷물을 걸러 플랑크톤을 먹어요.', facts:[{l:'입 크기',v:'최대 1.5m'},{l:'먹이 방법',v:'여과 섭식'},{l:'치아 수',v:'약 3,000개(먹는 데 안 씀)'},{l:'먹이',v:'크릴·물고기 알·플랑크톤'}], tip:'고래상어의 이빨은 3,000개나 되지만 먹는 데 쓰지 않아요. 진화의 흔적이에요!' },
+    { label:'청소년', desc:'열대 바다를 광범위하게 이동해요.', facts:[{l:'헤엄 속도',v:'약 5km/h'},{l:'이동 거리',v:'연간 수천 km'},{l:'잠수 깊이',v:'최대 1,900m'},{l:'생태 관광',v:'스노클링 파트너'}], tip:'고래상어는 스쿠버다이버와 함께 헤엄치기도 해요. 하지만 만지면 안 돼요!' },
+    { label:'성체', desc:'완전히 자란 고래상어예요.', facts:[{l:'몸 길이',v:'최대 18m'},{l:'몸무게',v:'최대 20톤'},{l:'번식 나이',v:'약 30년 후'},{l:'위협 요인',v:'혼획·선박 충돌'}], tip:'고래상어는 번식 가능 나이가 30년이에요. 한 번 죽으면 회복에 엄청난 시간이 걸려요.' }
+  ]},
+  { e:'🐢', ko:'장수거북', stages:[
+    { label:'알', desc:'모든 거북 중 가장 큰 장수거북이에요. 따뜻한 모래 속에서 새 생명이 자라고 있어요.', facts:[{l:'서식지',v:'열대·온대 대양'},{l:'보전 상태',v:'취약(VU)'},{l:'역사',v:'5,000만 년 전부터 생존'},{l:'위협',v:'비닐봉지 오인 섭취'}], tip:null },
+    { label:'새끼', desc:'밤에 알에서 깨어나 달빛을 따라 바다로 기어가요.', facts:[{l:'부화 기간',v:'약 60~70일'},{l:'부화 시간대',v:'주로 밤'},{l:'생존율',v:'1,000마리 중 1마리'},{l:'방향 감지',v:'지구 자기장 이용'}], tip:'아기 거북은 태어난 해변의 지구 자기장을 기억해요. 수십 년 후 번식을 위해 그 해변으로 돌아와요!' },
+    { label:'어린', desc:'해파리를 먹어요. 비닐봉지를 해파리로 착각해 먹기도 해요.', facts:[{l:'주식',v:'해파리'},{l:'비닐백 혼동',v:'해파리로 착각 섭취'},{l:'헤엄 속도',v:'최대 35km/h'},{l:'이동 거리',v:'연간 수천 km'}], tip:'바다에 버려진 비닐 1개가 장수거북의 목숨을 앗아갈 수 있어요. 비닐 사용을 줄이는 것이 거북을 살려요!' },
+    { label:'청소년', desc:'등은 딱딱한 껍질이 아닌 가죽 재질이에요.', facts:[{l:'체온 유지',v:'반온혈'},{l:'잠수 깊이',v:'최대 1,280m'},{l:'숨 참기',v:'최대 85분'},{l:'등껍질',v:'가죽 재질(유일)'}], tip:'장수거북 등은 가죽 같은 재질이에요. 그래서 이름이 "Leatherback"이에요!' },
+    { label:'성체', desc:'완전히 자란 장수거북이에요. 5,000만 년 동안 살아남은 생물이에요.', facts:[{l:'몸 길이',v:'최대 2m'},{l:'몸무게',v:'최대 900kg'},{l:'수명',v:'야생 45년 이상'},{l:'온도와 성별',v:'알 온도가 성별 결정'}], tip:'거북 알의 온도가 성별을 결정해요! 따뜻하면 암컷, 서늘하면 수컷. 기후변화로 수컷이 줄고 있어요.' }
+  ]},
+  { e:'🦜', ko:'카카포앵무새', stages:[
+    { label:'알', desc:'날지 못하는 세계 최대의 앵무새예요.', facts:[{l:'서식지',v:'뉴질랜드 섬'},{l:'보전 상태',v:'위급(CR)'},{l:'현재 개체 수',v:'약 270마리(2024)'},{l:'수명',v:'최대 90년 이상'}], tip:null },
+    { label:'새끼', desc:'잘 익은 리무 열매가 많이 달리는 해에만 번식해요.', facts:[{l:'부화 기간',v:'약 30일'},{l:'어미 육아',v:'어미 혼자'},{l:'번식 주기',v:'2~5년마다 풍작 해'},{l:'새끼 수',v:'1~4마리'}], tip:'카카포는 음식이 풍부할 때만 번식해요. 자원을 낭비하지 않는 자연의 지혜예요!' },
+    { label:'어린', desc:'날지 못하지만 나무를 잘 올라가요.', facts:[{l:'비행 능력',v:'날지 못함'},{l:'나무 오르기',v:'발톱과 부리로 기어오름'},{l:'낙하 방법',v:'날개를 펴 천천히 내려옴'},{l:'냄새',v:'달콤하고 강한 향'}], tip:'카카포는 약 90년까지 살 수 있어요. 지금 살고 있는 개체 중 1930년대에 태어난 개체도 있어요!' },
+    { label:'청소년', desc:'수컷은 번식기에 수 km까지 울어요.', facts:[{l:'먹이',v:'과일·씨앗·꽃·나무껍질'},{l:'먹이 방법',v:'씹어서 즙만 섭취'},{l:'야행성',v:'밤에만 활동'},{l:'울음',v:'수킬로미터 울림'}], tip:'수컷 카카포는 번식기에 땅에 만든 "울음 구덩이"에서 소리를 증폭시켜 울어요!' },
+    { label:'성체', desc:'1990년대 약 50마리에서 270마리 이상으로 늘었어요!', facts:[{l:'몸무게',v:'최대 4kg'},{l:'수명',v:'최대 90년 이상'},{l:'보호 방법',v:'포식자 없는 섬으로 이전'},{l:'복원 성공',v:'50→270마리 이상'}], tip:'1990년대 약 50마리까지 줄었던 카카포가 2024년 270마리 이상으로 늘었어요!' }
+  ]},
+  { e:'🦧', ko:'보르네오오랑우탄', stages:[
+    { label:'알', desc:'"오랑우탄"은 말레이어로 "숲의 사람"이에요.', facts:[{l:'서식지',v:'보르네오 섬 열대우림'},{l:'보전 상태',v:'위급(CR)'},{l:'DNA 유사도',v:'인간과 97% 일치'},{l:'위협 요인',v:'삼림 벌채·팜유 농장'}], tip:null },
+    { label:'새끼', desc:'최대 8년간 어미와 함께 모든 생존 기술을 배워요.', facts:[{l:'어미 의존 기간',v:'최대 7~8년'},{l:'임신 기간',v:'약 260일'},{l:'번식 주기',v:'7~8년에 1번'},{l:'수유 기간',v:'약 3~4년'}], tip:'오랑우탄은 7~8년에 한 번밖에 번식하지 않아요. 한 마리 죽으면 회복에 수십 년이 걸려요!' },
+    { label:'어린', desc:'비가 오면 나뭇잎을 우산처럼 써요.', facts:[{l:'도구 사용',v:'나뭇가지 도구 제작'},{l:'침대 만들기',v:'매일 밤 새 나뭇잎 침대'},{l:'지능',v:'거울에서 자신 인식'},{l:'우산 사용',v:'나뭇잎을 우산으로 활용'}], tip:'오랑우탄은 비가 오면 커다란 나뭇잎을 우산처럼 머리 위에 들고 이동해요!' },
+    { label:'청소년', desc:'하루 1km 정도만 이동하며 다양한 먹이를 먹어요.', facts:[{l:'먹이 종류',v:'약 400종 이상'},{l:'하루 이동',v:'약 1km'},{l:'팔 길이',v:'양팔 펼치면 2.4m'},{l:'씨앗 전파',v:'열대우림 유지 역할'}], tip:'오랑우탄이 사라지면 숲도 함께 사라져요. 씨앗을 퍼뜨려 열대우림을 유지해요.' },
+    { label:'성체', desc:'완전히 자란 보르네오오랑우탄이에요.', facts:[{l:'몸무게',v:'수컷 최대 100kg'},{l:'수명',v:'야생 40~50년'},{l:'현재 개체 수',v:'약 104,700마리'},{l:'지속가능 팜유',v:'인증 제품 선택이 도움'}], tip:'팜유는 과자·화장품·세제에 많이 들어가요. 지속가능한 팜유 인증 제품을 선택하는 것이 오랑우탄을 도와요!' }
+  ]},
+  { e:'🐼', ko:'자이언트판다', stages:[
+    { label:'알', desc:'세계에서 가장 사랑받는 동물 중 하나예요.', facts:[{l:'서식지',v:'중국 쓰촨·산시·간쑤 성'},{l:'보전 상태',v:'취약(VU)'},{l:'복원 성과',v:'2016년 위급→취약으로 하향'},{l:'현재 개체 수',v:'약 1,864마리(2024)'}], tip:null },
+    { label:'새끼', desc:'태어날 때는 겨우 100g! 어미 체중의 1/900에 불과해요.', facts:[{l:'출생 체중',v:'약 80~200g'},{l:'어미 대비',v:'어미 체중의 약 1/900'},{l:'눈 뜨는 시기',v:'생후 약 6~8주'},{l:'흑백 무늬',v:'생후 1개월 후 뚜렷해짐'}], tip:'아기 판다는 태어날 때 분홍색이에요!' },
+    { label:'어린', desc:'하루 14시간 이상 대나무를 먹어요.', facts:[{l:'주식',v:'대나무(99% 이상)'},{l:'하루 식사량',v:'약 12~38kg'},{l:'식사 시간',v:'하루 12~16시간'},{l:'가짜 엄지',v:'확장된 손목 뼈'}], tip:'판다의 "6번째 발가락"은 사실 확장된 손목 뼈예요. 대나무를 잡기 위해 진화한 적응이에요!' },
+    { label:'청소년', desc:'수컷은 더 높이 냄새를 남기려고 나무에 물구나무를 서요!', facts:[{l:'사회성',v:'단독 생활'},{l:'영역 표시',v:'나무에 체취·스크래치'},{l:'물구나무',v:'더 높이 표시하려고!'},{l:'눈 무늬',v:'눈부심 줄이는 선글라스 역할'}], tip:'수컷 판다는 더 높은 곳에 냄새를 남기려고 나무에 대고 물구나무를 서요!' },
+    { label:'성체', desc:'완전히 자란 자이언트판다예요! 개체 수가 계속 늘고 있어요.', facts:[{l:'몸무게',v:'최대 160kg'},{l:'수명',v:'야생 20년·사육 30년'},{l:'현재 개체 수',v:'약 1,864마리(2024)'},{l:'보전 방법',v:'대나무 숲 보호·사육 번식'}], tip:'자이언트판다는 2016년 "위급"에서 "취약"으로 보전 등급이 낮아졌어요. 할 수 있어요!' }
+  ]},
+  { e:'🦦', ko:'해달', stages:[
+    { label:'알', desc:'등을 대고 누워 밥을 먹고 손을 잡고 자는 귀여운 동물이에요!', facts:[{l:'서식지',v:'북태평양 연안'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'체모 수',v:'1cm²당 약 10만 개'},{l:'역사',v:'한때 1,000마리 미만까지 감소'}], tip:null },
+    { label:'새끼', desc:'어미 배 위에 올라타며 자라요.', facts:[{l:'출생 체중',v:'약 1.4~2.3kg'},{l:'수영',v:'처음엔 못함, 어미가 보호'},{l:'솜털',v:'물에 뜨는 구명조끼 역할'},{l:'어미 의존',v:'약 6~8개월'}], tip:'아기 해달은 솜털이 너무 많아서 물에 뜰 수밖에 없어요!' },
+    { label:'어린', desc:'돌을 도구로 써서 조개·성게를 깨먹는 법을 배워요.', facts:[{l:'도구 사용',v:'돌로 조개껍데기 깨기'},{l:'돌 보관',v:'겨드랑이 주름에 넣음'},{l:'하루 식사량',v:'체중의 25%'},{l:'먹이',v:'성게·조개·게·물고기'}], tip:'해달은 좋아하는 돌을 겨드랑이에 넣고 다녀요. 같은 돌을 몇 년씩 쓰기도 해요!' },
+    { label:'청소년', desc:'켈프 숲의 수호자예요. 성게를 먹어 생태 균형을 유지해요.', facts:[{l:'생태 역할',v:'켈프 숲 생태계 균형 유지'},{l:'손 잡기',v:'떠내려가지 않으려 손 잡음'},{l:'잠자는 방법',v:'켈프에 몸을 감아 고정'},{l:'수영 속도',v:'최대 9km/h'}], tip:'해달 집단은 잘 때 서로 손을 잡아요! 조류에 떠내려가지 않으려는 행동이에요!' },
+    { label:'성체', desc:'완전히 자란 해달이에요.', facts:[{l:'몸무게',v:'수컷 최대 45kg'},{l:'수명',v:'야생 10~23년'},{l:'현재 개체 수',v:'약 125,000마리'},{l:'복원 성과',v:'1,000마리→125,000마리'}], tip:'19세기 해달은 모피 때문에 거의 멸종됐어요. 지금은 보전법 덕에 회복 중이에요!' }
+  ]},
+  { e:'🐺', ko:'에티오피아늑대', stages:[
+    { label:'알', desc:'세계에서 가장 희귀한 개과 동물이에요.', facts:[{l:'서식지',v:'에티오피아 고산 초원'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'현재 개체 수',v:'약 400~500마리'},{l:'서식 고도',v:'해발 3,200~4,500m'}], tip:null },
+    { label:'새끼', desc:'무리 전체가 새끼를 돌봐요.', facts:[{l:'무리 규모',v:'약 3~13마리'},{l:'양육 방식',v:'무리 전체 참여'},{l:'출생 시기',v:'주로 10~12월'},{l:'새끼 수',v:'2~6마리'}], tip:'에티오피아늑대는 어린 새끼를 무리 전원이 함께 돌봐요. 진정한 팀워크예요!' },
+    { label:'어린', desc:'에티오피아두더지쥐가 주된 먹이예요.', facts:[{l:'주 먹이',v:'에티오피아두더지쥐(70%)'},{l:'사냥 방식',v:'홀로 사냥'},{l:'특징',v:'개인 플레이+팀 생활 동시에'},{l:'울음',v:'복잡한 howl로 소통'}], tip:'에티오피아늑대는 혼자 사냥하지만 무리와 함께 자고 이동해요!' },
+    { label:'청소년', desc:'전염병(광견병)이 가장 큰 위협이에요.', facts:[{l:'최대 위협',v:'광견병 전파'},{l:'위협 요인',v:'서식지 농지화·마을개 접촉'},{l:'백신 접종',v:'구조팀이 야생 개체에 투여'},{l:'총 개체 수',v:'약 400~500마리'}], tip:'수의사들이 에티오피아 고원을 올라 야생 늑대에게 직접 광견병 백신을 놔요!' },
+    { label:'성체', desc:'완전히 자란 에티오피아늑대예요.', facts:[{l:'몸무게',v:'약 11~19kg'},{l:'수명',v:'야생 약 8~10년'},{l:'보전 기관',v:'에티오피아늑대보전프로그램'},{l:'프로그램 기간',v:'30년간 야생 개체 지킴'}], tip:'에티오피아늑대보전프로그램(EWCP)은 30년간 야생 개체를 지켜왔어요!' }
+  ]},
+  { e:'🦒', ko:'북부기린', stages:[
+    { label:'알', desc:'지구에서 가장 키 큰 동물이에요.', facts:[{l:'서식지',v:'사하라 이남 아프리카'},{l:'보전 상태',v:'취약(VU)'},{l:'최대 키',v:'5.8m'},{l:'목뼈 수',v:'인간과 같은 7개'}], tip:null },
+    { label:'새끼', desc:'태어날 때부터 키 1.8m에요!', facts:[{l:'출생 신장',v:'약 1.8m'},{l:'출생 체중',v:'약 68~100kg'},{l:'걷는 시간',v:'2시간 이내'},{l:'달리는 시간',v:'24시간 이내'}], tip:'아기 기린은 최대 2m 높이에서 떨어지며 태어나요. 강하게 태어나야 초원에서 살아남아요!' },
+    { label:'어린', desc:'50cm 혀로 아카시아 가시 사이를 비집고 잎을 먹어요.', facts:[{l:'혀 길이',v:'약 50cm'},{l:'혀 색',v:'보라색(자외선 차단)'},{l:'하루 식사량',v:'약 34kg의 나뭇잎'},{l:'물 마시기',v:'불편해서 며칠에 한 번'}], tip:'기린 혀가 보라색인 이유는 자외선 화상을 막기 위한 거예요. 자연의 자외선 차단이에요!' },
+    { label:'청소년', desc:'물을 마실 때 앞다리를 크게 벌려야 해서 포식자에게 취약해요.', facts:[{l:'심장 크기',v:'약 11kg'},{l:'혈압',v:'인간의 2배'},{l:'수면',v:'하루 30분~2시간만 잠'},{l:'발차기',v:'사자도 날릴 수 있는 힘'}], tip:'기린은 하루 30분밖에 안 자요! 서서 짧게 4분짜리 낮잠을 여러 번 자요.' },
+    { label:'성체', desc:'완전히 자란 북부기린이에요. 지난 30년간 개체가 40%나 줄었어요.', facts:[{l:'키',v:'최대 5.8m'},{l:'몸무게',v:'최대 1,930kg'},{l:'수명',v:'야생 약 26년'},{l:'개체 수 변화',v:'지난 30년 40% 감소'}], tip:'기린의 위기는 "조용한 멸종위기"라 불려요. 유명하지만 실제로 급격히 줄고 있어요.' }
+  ]},
+  { e:'🐊', ko:'시암악어', stages:[
+    { label:'알', desc:'동남아시아에서 가장 희귀한 악어예요.', facts:[{l:'서식지',v:'동남아시아 강·호수·습지'},{l:'보전 상태',v:'위급(CR)'},{l:'현재 개체 수',v:'야생 약 1,000마리 미만'},{l:'재발견',v:'캄보디아에서 야생 개체군 재발견'}], tip:null },
+    { label:'새끼', desc:'부화 시 새끼를 입에 물어 물로 데려다줘요.', facts:[{l:'알 수',v:'약 20~50개'},{l:'부화 기간',v:'약 80일'},{l:'어미 보호',v:'수개월간 알 지킴'},{l:'부화 직후',v:'어미 입에 물어 이동'}], tip:'악어 어미는 새끼를 입에 넣어 이동할 만큼 부드러워요.' },
+    { label:'어린', desc:'입을 벌리고 누워있는 건 체온 조절이에요.', facts:[{l:'체온 조절',v:'변온동물'},{l:'입 벌리기',v:'체온 조절용 행동'},{l:'시력',v:'물속에서 뛰어난 시력'},{l:'먹이',v:'물고기·개구리·작은 포유류'}], tip:'악어가 입을 벌리고 누워 있는 건 더우면 입으로 열을 내보내는 거예요. 악어판 에어컨이에요!' },
+    { label:'청소년', desc:'악어가 파놓은 웅덩이는 건기에 다른 동물들의 물 공급원이 돼요.', facts:[{l:'생태 역할',v:'웅덩이 만들어 다른 종 지원'},{l:'수명',v:'야생 30~70년'},{l:'성장 기간',v:'성체까지 약 10년'},{l:'위협',v:'서식지 파괴·불법 포획'}], tip:'악어가 만든 웅덩이는 건기에 수십 종의 동물이 먹는 물을 공급해요.' },
+    { label:'성체', desc:'완전히 자란 시암악어예요.', facts:[{l:'몸 길이',v:'최대 4m'},{l:'몸무게',v:'최대 350kg'},{l:'보전 방법',v:'사육 번식 후 야생 방사'},{l:'복원 목표',v:'안전한 강으로 개체 복귀'}], tip:'시암악어 복원에는 사육 번식 프로그램이 핵심이에요!' }
+  ]},
+  { e:'🦋', ko:'모나크나비', stages:[
+    { label:'알', desc:'캐나다에서 멕시코까지 4,500km를 이동해요!', facts:[{l:'서식지',v:'북미 대륙·멕시코 월동지'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'이동 거리',v:'최대 4,500km'},{l:'개체 수 변화',v:'1990년대 대비 80% 감소'}], tip:null },
+    { label:'새끼', desc:'애벌레는 박주가리(밀크위드) 식물만 먹어요.', facts:[{l:'먹이(애벌레)',v:'박주가리만'},{l:'독성 축적',v:'밀크위드 독을 몸에 저장'},{l:'경고색',v:'주황·검정은 "나 독있어" 신호'},{l:'번데기',v:'선명한 녹색+금 점'}], tip:'모나크나비의 주황색은 경고색이에요. "나를 먹으면 독이야!"라는 신호예요!' },
+    { label:'어린', desc:'꽃가루를 옮기는 중요한 수분 매개자 역할을 해요.', facts:[{l:'먹이(성충)',v:'꽃꿀'},{l:'수분 역할',v:'다양한 꽃의 수분 매개'},{l:'날개 폭',v:'약 8.9~10.2cm'},{l:'GPS 방법',v:'태양+지구 자기장 이용'}], tip:'나비 하나가 생태계 전체와 연결돼요.' },
+    { label:'청소년', desc:'수억 마리가 멕시코 전나무 숲으로 모여들어요.', facts:[{l:'이동 방향',v:'태양+자기장으로 탐색'},{l:'월동지',v:'멕시코 미초아칸 주 전나무숲'},{l:'월동 기간',v:'11월~3월'},{l:'세대 교체',v:'이동 세대는 8개월 생존'}], tip:'모나크나비 수억 마리가 나무를 뒤덮으면 나뭇가지가 부러지기도 해요. 자연의 장관이에요!' },
+    { label:'성체', desc:'완전히 자란 모나크나비예요.', facts:[{l:'수명',v:'여름 2~6주, 이동 세대 8개월'},{l:'세대 수',v:'1년에 3~5세대'},{l:'위협 요인',v:'박주가리 감소·기후변화'},{l:'도움 방법',v:'박주가리를 정원에 심기'}], tip:'박주가리(밀크위드)를 정원에 심으면 모나크나비를 도울 수 있어요!' }
+  ]},
+  { e:'🦅', ko:'필리핀독수리', stages:[
+    { label:'알', desc:'세계에서 가장 강력한 독수리예요.', facts:[{l:'서식지',v:'필리핀 민다나오 섬 열대우림'},{l:'보전 상태',v:'위급(CR)'},{l:'현재 개체 수',v:'약 800마리'},{l:'날개폭',v:'약 1.8~2.2m'}], tip:null },
+    { label:'새끼', desc:'2년에 한 번만 알을 낳아요.', facts:[{l:'번식 주기',v:'2년에 한 번'},{l:'알 수',v:'1개'},{l:'부화 기간',v:'약 60일'},{l:'독립 시기',v:'생후 약 2년'}], tip:'부모가 2년 내내 새끼를 키워요. 새끼가 죽으면 그 해는 다시 번식을 시도하지 않아요.' },
+    { label:'어린', desc:'시력이 인간의 8배예요.', facts:[{l:'주 먹이',v:'원숭이·날다람쥐·뱀'},{l:'비행 속도',v:'최대 100km/h'},{l:'눈 시력',v:'인간의 8배'},{l:'사냥 방식',v:'숲 속에서 급습'}], tip:'필리핀독수리는 나무 꼭대기에서 숲 바닥의 작은 동물도 정확히 볼 수 있어요!' },
+    { label:'청소년', desc:'이 독수리가 있다는 건 숲이 건강하다는 증거예요.', facts:[{l:'영역 크기',v:'약 100km²'},{l:'숲 의존',v:'성숙한 원시림만 서식'},{l:'생태 지표',v:'건강한 숲의 상징'},{l:'위협',v:'삼림 벌채·불법 포획'}], tip:'이 독수리를 지키는 건 거대한 원시림을 통째로 지키는 거예요.' },
+    { label:'성체', desc:'완전히 자란 필리핀독수리예요.', facts:[{l:'날개폭',v:'약 1.8~2.2m'},{l:'몸무게',v:'약 4.7~8kg'},{l:'수명',v:'최대 60년'},{l:'법적 보호',v:'살상 시 최대 12년 징역'}], tip:'필리핀독수리센터는 부상 독수리를 치료하고 방사해요!' }
+  ]},
+  { e:'🐆', ko:'눈표범', stages:[
+    { label:'알', desc:'히말라야의 "산의 유령"이에요.', facts:[{l:'서식지',v:'중앙아시아·히말라야 고산'},{l:'보전 상태',v:'취약(VU)'},{l:'현재 개체 수',v:'약 4,000~6,500마리'},{l:'별명',v:'산의 유령'}], tip:null },
+    { label:'새끼', desc:'꼬리를 추울 때 머플러로 사용해요.', facts:[{l:'출생 수',v:'1~5마리'},{l:'어미 의존',v:'약 18~22개월'},{l:'꼬리 길이',v:'약 90cm(몸길이만큼)'},{l:'꼬리 용도',v:'추울 때 머플러로 활용'}], tip:'눈표범 꼬리는 몸길이만큼 길어요. 추울 때 코와 입을 감싸는 뽀송뽀송한 담요예요!' },
+    { label:'어린', desc:'회백색 털이 눈과 바위에 완벽히 녹아들어요.', facts:[{l:'위장색',v:'회백색+검은 반점'},{l:'발바닥',v:'넓어서 눈에 빠지지 않음'},{l:'도약력',v:'수평 15m·수직 6m'},{l:'야행성',v:'주로 새벽·해질녘 활동'}], tip:'눈표범 발바닥은 매우 넓어서 눈 위에서 잘 빠지지 않아요. 자연이 만든 스노우슈예요!' },
+    { label:'청소년', desc:'해발 3,000~5,500m에서 살아요.', facts:[{l:'서식 고도',v:'3,000~5,500m'},{l:'주 먹이',v:'설산양·산양·마못'},{l:'영역 크기',v:'최대 1,000km²'},{l:'사냥 방법',v:'절벽 위에서 내려와 급습'}], tip:'눈표범은 절벽 위에서 먹이를 향해 최대 15m 도약해 사냥해요!' },
+    { label:'성체', desc:'완전히 자란 눈표범이에요.', facts:[{l:'몸무게',v:'27~55kg'},{l:'수명',v:'야생 10~12년'},{l:'기후 위협',v:'히말라야 눈 감소로 서식지 축소'},{l:'보전 방법',v:'밀렵 차단·가축 분쟁 완화'}], tip:'기후변화로 히말라야 눈이 줄면서 눈표범의 서식지가 좁아지고 있어요. 기후행동이 눈표범을 구해요.' }
+  ]},
+  { e:'🦭', ko:'하와이물범', stages:[
+    { label:'알', desc:'하와이에서만 사는 세계 유일한 열대 물범이에요.', facts:[{l:'서식지',v:'하와이 북서부 섬·산호초'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'현재 개체 수',v:'약 1,400마리'},{l:'문화 의미',v:'하와이 원주민에게 신성한 존재'}], tip:null },
+    { label:'새끼', desc:'어미는 6주 동안 아무것도 먹지 않아요!', facts:[{l:'수유 기간',v:'약 5~6주'},{l:'어미 단식',v:'수유 기간 내내 먹지 않음'},{l:'어미 체중 감소',v:'약 68kg 감소'},{l:'새끼 체중 증가',v:'18kg → 54~90kg'}], tip:'어미 물범은 새끼 수유 기간 6주 동안 굶어요. 모성의 극한이에요!' },
+    { label:'어린', desc:'산호초 구석구석 틈새에 몸을 비집어 넣어 먹이를 찾아요.', facts:[{l:'먹이',v:'물고기·문어·갑각류'},{l:'잠수 깊이',v:'최대 300m'},{l:'숨 참기',v:'최대 20분'},{l:'탐험 방식',v:'산호초 틈새 파고들기'}], tip:'하와이물범은 산호초 구석구석 틈새에 몸을 비집어 넣어 먹이를 찾아요!' },
+    { label:'청소년', desc:'해변에 누워 있는 건 아픈 게 아니에요.', facts:[{l:'일광욕',v:'체온 조절·기생충 제거'},{l:'수면',v:'물속에서도 잠 잘 수 있음'},{l:'접근 금지',v:'인간이 접근하면 스트레스'},{l:'수명',v:'약 25~30년'}], tip:'하와이물범이 해변에 누워 있으면 접근하거나 만지면 안 돼요! 자연스러운 행동이에요.' },
+    { label:'성체', desc:'완전히 자란 하와이물범이에요.', facts:[{l:'몸 길이',v:'약 2.1~2.4m'},{l:'몸무게',v:'약 170~270kg'},{l:'보전 지위',v:'하와이 공식 주 해양 포유류'},{l:'시민 보전',v:'자원봉사자들이 해변 모니터링'}], tip:'하와이물범 목격 신고를 받으면 자원봉사자들이 달려가 지켜줘요. 시민이 보전의 핵심이에요!' }
+  ]},
+  { e:'🦬', ko:'유럽들소', stages:[
+    { label:'알', desc:'1927년 야생 멸종됐다가 기적적으로 복원됐어요!', facts:[{l:'서식지',v:'폴란드·벨라루스 국경 원시림'},{l:'보전 상태',v:'취약(VU)'},{l:'복원 기적',v:'12마리→7,000마리 이상'},{l:'복원 시작',v:'1952년 첫 야생 방사'}], tip:null },
+    { label:'새끼', desc:'새끼가 태어나면 어른 들소들이 빙 둘러서 보호해요.', facts:[{l:'출생 체중',v:'약 25~35kg'},{l:'무리 보호',v:'어른 들소가 원형으로 둘러쌈'},{l:'어미 의존',v:'약 1년'},{l:'무리 구성',v:'암컷·새끼 중심'}], tip:'들소 무리는 천적이 나타나면 새끼를 가운데 두고 어른들이 원을 그려 보호해요!' },
+    { label:'어린', desc:'들소가 풀을 뜯고 지나간 자리에 다양한 야생화가 피어요.', facts:[{l:'먹이',v:'풀·허브·나무껍질·나뭇잎'},{l:'생태 역할',v:'숲 구조 다양성 유지'},{l:'하루 먹이',v:'약 32kg'},{l:'반추동물',v:'위가 4개, 되새김 가능'}], tip:'들소가 사는 숲은 더 다양한 생물이 살 수 있어요!' },
+    { label:'청소년', desc:'번식기 수컷은 뿔로 싸워 서열을 정해요.', facts:[{l:'뿔 길이',v:'최대 80cm'},{l:'뿔 용도',v:'수컷 서열 경쟁'},{l:'달리기',v:'최대 56km/h'},{l:'울음',v:'낮은 큰 소리로 숲 울림'}], tip:'유럽의 숲에서 사라졌던 들소 울음소리가 이제 돌아왔어요!' },
+    { label:'성체', desc:'1927년 야생 멸종에서 7,000마리로! 보전의 기적이에요.', facts:[{l:'몸무게',v:'수컷 최대 920kg'},{l:'수명',v:'야생 약 24년'},{l:'현재 개체 수',v:'야생 약 7,000마리 이상'},{l:'복원 교훈',v:'멸종 후에도 복원 가능'}], tip:'유럽들소는 12마리에서 7,000마리로! 인간이 멸종시킨 동물을 다시 살릴 수 있다는 희망이에요.' }
+  ]},
+  { e:'🦚', ko:'녹색공작', stages:[
+    { label:'알', desc:'동남아시아에 사는 녹색공작은 암수 모두 화려한 깃털을 가져요!', facts:[{l:'서식지',v:'동남아시아 열대림·초원'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'특징',v:'암수 모두 화려한 깃털'},{l:'위협 요인',v:'깃털 거래·서식지 감소'}], tip:null },
+    { label:'새끼', desc:'나뭇가지 위에서 자는 습관을 길러요.', facts:[{l:'부화 기간',v:'약 28일'},{l:'새끼 수',v:'3~6마리'},{l:'독립 시기',v:'약 6개월'},{l:'잠자리',v:'태어나자마자 나무 위에서 잠'}], tip:'공작 새끼는 태어난 지 며칠 만에 나뭇가지에 올라가 자요!' },
+    { label:'어린', desc:'수컷의 꼬리는 3년이 지나야 완성돼요.', facts:[{l:'꼬리 완성',v:'3년 이상 소요'},{l:'꼬리 길이',v:'최대 2m 이상'},{l:'꼬리 수',v:'약 200여 개의 깃털'},{l:'눈 무늬',v:'수백 개의 눈 모양 패턴'}], tip:'공작 꼬리의 가짜 눈이 많을수록 암컷에게 인기가 높아요!' },
+    { label:'청소년', desc:'꼬리를 흔들 때 초저주파로 신호를 보내요.', facts:[{l:'구애 행동',v:'꼬리를 180° 부채 모양으로 펼침'},{l:'초저주파',v:'꼬리 진동으로 신호 전달'},{l:'먹이',v:'씨앗·곤충·작은 도마뱀'},{l:'경보음',v:'날카로운 소리로 포식자 경고'}], tip:'공작 꼬리를 펼치면 소리 없는 저주파가 나와요. 암컷은 이 진동을 피부로 느껴요!' },
+    { label:'성체', desc:'불법 깃털 거래 거부가 이 새를 지키는 일이에요.', facts:[{l:'몸 길이',v:'수컷 2.5~3m(꼬리 포함)'},{l:'몸무게',v:'수컷 약 5kg'},{l:'수명',v:'야생 약 15~20년'},{l:'보전 방법',v:'불법 깃털 거래 거부'}], tip:'녹색공작 깃털은 불법 거래 대상이에요. 장식용 깃털 구매를 거부하는 것이 이 새를 지켜요.' }
+  ]},
+  { e:'🦩', ko:'저어새', stages:[
+    { label:'알', desc:'한국 서해안이 주요 번식지로 전 세계 개체의 대부분이 여기서 태어나요!', facts:[{l:'서식지',v:'한국·중국·일본 연안'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'현재 개체 수',v:'약 7,000마리(2024)'},{l:'주 번식지',v:'인천 서해안 무인도'}], tip:null },
+    { label:'새끼', desc:'독특한 주걱 부리 모양이 어릴 때부터 있어요.', facts:[{l:'부화 기간',v:'약 25~28일'},{l:'알 수',v:'2~4개'},{l:'양육',v:'암수 함께'},{l:'독립 시기',v:'약 45~50일'}], tip:'아기 저어새의 주걱 부리는 자라면서 점점 길어지고 넓어져요!' },
+    { label:'어린', desc:'주걱 같은 부리를 물속에서 좌우로 흔들며 먹이를 잡아요.', facts:[{l:'먹이 방법',v:'부리를 물속에서 좌우로 흔듦'},{l:'먹이',v:'물고기·게·새우·개구리'},{l:'이름 유래',v:'주걱처럼 생긴 부리'},{l:'촉각 수용체',v:'눈 감고도 물고기 감지'}], tip:'저어새는 눈을 감고도 먹이를 잡을 수 있어요! 부리의 촉각 수용체로 물속 물고기를 감지해요!' },
+    { label:'청소년', desc:'겨울은 타이완·홍콩에서 보내고 봄에 한국으로 돌아와요.', facts:[{l:'장식깃',v:'번식기 수컷에 노란 관깃'},{l:'무리 생활',v:'수십~수백 마리 무리'},{l:'월동지',v:'타이완·홍콩·베트남'},{l:'이동',v:'봄 한국으로 북상'}], tip:'저어새는 한국과 타이완이 함께 지켜야 하는 새예요!' },
+    { label:'성체', desc:'1990년대 200마리 미만에서 7,000마리로 회복됐어요!', facts:[{l:'몸 길이',v:'약 74~81cm'},{l:'수명',v:'약 28년'},{l:'복원 성과',v:'200마리→7,000마리'},{l:'번식지',v:'인천 공단 옆 작은 섬들'}], tip:'우리 주변 환경을 보전하는 것이 저어새를 지키는 일이에요!' }
+  ]},
+  { e:'🐳', ko:'북대서양참고래', stages:[
+    { label:'알', desc:'세계에서 가장 희귀한 고래예요. 단 360마리만 남아있어요.', facts:[{l:'서식지',v:'북대서양'},{l:'보전 상태',v:'위급(CR)'},{l:'현재 개체 수',v:'약 360마리(2024)'},{l:'번식 암컷',v:'70마리도 안 됨'}], tip:null },
+    { label:'새끼', desc:'어미와 1년 이상 함께 다니며 이동 경로를 배워요.', facts:[{l:'임신 기간',v:'약 12개월'},{l:'수유 기간',v:'약 12개월'},{l:'출생 체중',v:'약 900~1,000kg'},{l:'번식 주기',v:'3~5년에 1번'}], tip:'참고래 어미는 이동 경로·먹이터·안전한 장소를 새끼에게 알려줘요. 문화 전수예요.' },
+    { label:'어린', desc:'머리의 각질판 패턴으로 개체를 구별해요.', facts:[{l:'각질판',v:'개체마다 다른 패턴'},{l:'수염판',v:'입 안의 수염으로 크릴 여과'},{l:'먹이',v:'코페포드(작은 갑각류)'},{l:'연구 방법',v:'각질판 사진으로 개체 구별'}], tip:'참고래 연구자들은 머리 각질판 사진으로 개체를 구별해요. 사진 하나가 이 고래의 신분증이에요.' },
+    { label:'청소년', desc:'선박 충돌과 어망 엉킴이 주요 사망 원인이에요.', facts:[{l:'주요 위협',v:'선박 충돌·어망 엉킴'},{l:'해결 방법',v:'선박 감속·어망 변경 운동'},{l:'음향 신호',v:'선박에 고래 위치 알림 장치'},{l:'긴급성',v:'연간 사망이 번식보다 많음'}], tip:'선박들이 참고래 서식지에서 속도를 줄이면 충돌 사망을 크게 줄일 수 있어요.' },
+    { label:'성체', desc:'전 세계가 함께 지켜야 하는 고래예요.', facts:[{l:'몸 길이',v:'최대 18m'},{l:'몸무게',v:'최대 100톤'},{l:'수명',v:'약 70년 이상'},{l:'긴급 현황',v:'매년 태어나는 수보다 죽는 수가 많음'}], tip:'360마리 중 번식 가능한 암컷은 70마리도 안 돼요. 이 고래 한 마리가 얼마나 소중한지 느껴지나요?' }
+  ]},
+  { e:'🐬', ko:'이라와디돌고래', stages:[
+    { label:'알', desc:'어부들과 협력해 물고기를 함께 잡아요!', facts:[{l:'서식지',v:'동남아시아 강·연안·하구'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'특기',v:'어부와 협력 어업'},{l:'생김새',v:'부리 없는 동그란 얼굴'}], tip:null },
+    { label:'새끼', desc:'어미와 긴밀히 붙어다니며 어부 협력 방법을 배워요.', facts:[{l:'임신 기간',v:'약 14개월'},{l:'수유 기간',v:'약 2년'},{l:'번식 주기',v:'2~3년에 1번'},{l:'얼굴',v:'연한 미소 같은 얼굴'}], tip:'이라와디돌고래는 연한 미소 같은 얼굴이에요. 표정이 다양하고 인간과 상호작용을 즐겨요.' },
+    { label:'어린', desc:'물을 뿜어 어부에게 신호를 보내요.', facts:[{l:'협력 어업',v:'어부 그물 안으로 물고기 몰기'},{l:'신호 방법',v:'입으로 물 뿜기·꼬리 치기'},{l:'보상',v:'밀려온 물고기를 함께 먹음'},{l:'전통',v:'수백 년 된 어업 협력'}], tip:'이라와디돌고래와 어부의 협력 어업은 수백 년 된 전통이에요!' },
+    { label:'청소년', desc:'댐 건설이 가장 큰 위협이에요.', facts:[{l:'서식지',v:'메콩·이라와디·마하캄 강'},{l:'잠수 깊이',v:'최대 30m'},{l:'무리 크기',v:'보통 2~6마리'},{l:'위협 요인',v:'댐·전기물고기잡이·그물'}], tip:'라오스 메콩강의 이라와디돌고래는 댐 건설 이후 급감해 지금은 수십 마리만 남아있어요.' },
+    { label:'성체', desc:'완전히 자란 이라와디돌고래예요.', facts:[{l:'몸 길이',v:'최대 2.8m'},{l:'몸무게',v:'최대 200kg'},{l:'수명',v:'약 30년'},{l:'문화 보전',v:'협력 어업 전통 계승이 중요'}], tip:'이라와디돌고래와 함께 어업하는 전통이 사라지면 돌고래도 사라져요.' }
+  ]},
+  { e:'🦫', ko:'유라시아비버', stages:[
+    { label:'알', desc:'강의 건축가, 유라시아비버가 태어날 준비를 하고 있어요.', facts:[{l:'서식지',v:'유럽·아시아 강가 숲'},{l:'보전 상태',v:'관심 필요(LC)'},{l:'생태 역할',v:'댐 건설로 습지 생태계 창조'},{l:'특기',v:'세계 최장 850m 댐 건설'}], tip:null },
+    { label:'새끼', desc:'눈을 뜬 채로 태어나 며칠 만에 헤엄을 칠 수 있어요.', facts:[{l:'출생 시 눈',v:'뜬 채로 태어남'},{l:'헤엄',v:'태어나 며칠 만에 가능'},{l:'가족 구성',v:'부모+전년 새끼들 함께'},{l:'독립 시기',v:'약 2년'}], tip:'비버는 눈을 뜬 상태로 태어나요. 태어나자마자 헤엄칠 수 있어요!' },
+    { label:'어린', desc:'철 성분이 든 법랑질 덕분에 앞니는 주황색이고 강철보다 단단해요!', facts:[{l:'앞니 색',v:'주황색(철분 함유 법랑질)'},{l:'앞니 강도',v:'철보다 단단함'},{l:'앞니 성장',v:'평생 계속 자람'},{l:'먹이',v:'나무껍질·수생식물·뿌리'}], tip:'비버의 주황 앞니는 나무를 갉을수록 더 날카로워지는 자기 연마 이빨이에요!' },
+    { label:'청소년', desc:'세계에서 가장 긴 비버 댐은 무려 850m예요!', facts:[{l:'댐 최장 기록',v:'캐나다 앨버타주 850m'},{l:'댐 재료',v:'나무·진흙·돌'},{l:'생태 효과',v:'수십 종의 동물이 사는 연못 창조'},{l:'굴 입구',v:'수면 아래에 숨겨 적 차단'}], tip:'비버 댐이 만드는 연못은 수달·오리·개구리·물고기의 서식지가 돼요!' },
+    { label:'성체', desc:'완전히 자란 유라시아비버예요!', facts:[{l:'몸무게',v:'최대 30kg'},{l:'잠수',v:'최대 15분'},{l:'수명',v:'야생 약 10~12년'},{l:'꼬리',v:'납작한 노 모양(수영 조향)'}], tip:'비버는 기후행동으로 자란 여러분처럼 세상을 바꾸는 존재예요!' }
+  ]},
+  { e:'🦌', ko:'순록', stages:[
+    { label:'알', desc:'기후변화의 영향을 가장 먼저 받는 동물이에요.', facts:[{l:'서식지',v:'북극권·아북극권·타이가'},{l:'보전 상태',v:'취약(VU)'},{l:'뿔 특징',v:'암수 모두 뿔 있음(유일)'},{l:'개체 수 변화',v:'지난 20년간 40% 감소'}], tip:null },
+    { label:'새끼', desc:'태어난 지 90분 만에 어미를 따라 이동해요.', facts:[{l:'기립 시간',v:'생후 수 시간 이내'},{l:'이동 가능',v:'생후 90분 이내'},{l:'출생 체중',v:'약 5~9kg'},{l:'수유 기간',v:'약 6개월'}], tip:'아기 순록은 불과 90분 만에 어미를 따라 이동해요!' },
+    { label:'어린', desc:'발굽으로 눈을 헤쳐 1m 아래 이끼를 냄새로 찾아요.', facts:[{l:'주 먹이',v:'지의류(순록이끼)'},{l:'발굽 특기',v:'눈을 헤쳐 먹이 찾기'},{l:'후각',v:'눈 1m 아래 먹이도 감지'},{l:'이동 거리',v:'연간 최대 5,000km'}], tip:'순록은 눈 1m 아래에 묻힌 이끼를 냄새로 찾아요! 코가 달린 먹이 탐지기예요.' },
+    { label:'청소년', desc:'봄에 수천 마리가 무리지어 북쪽으로 이동해요.', facts:[{l:'이동 거리',v:'연간 최대 5,000km'},{l:'무리 크기',v:'수천~수십만 마리'},{l:'이동 방향',v:'봄 북상·가을 남하'},{l:'장관',v:'지구 최대 규모 육상 이동'}], tip:'순록 무리의 대이동은 지구에서 가장 장엄한 자연 현상 중 하나예요!' },
+    { label:'성체', desc:'완전히 자란 순록이에요. 기후행동이 순록을 살려요!', facts:[{l:'몸무게',v:'수컷 최대 320kg'},{l:'수명',v:'야생 약 15년'},{l:'기후 위협',v:'북극 온난화가 이끼 접근 방해'},{l:'변화 속도',v:'북극 온도 세계 평균의 4배 빠름'}], tip:'순록 감소의 가장 큰 이유는 기후변화예요. 기후행동이 순록을 살려요!' }
+  ]},
+  { e:'🦔', ko:'피그미고슴도치', stages:[
+    { label:'알', desc:'아프리카 사막에 살며 여름에 하면(夏眠)을 자는 동물이에요.', facts:[{l:'서식지',v:'북아프리카·중동 사막'},{l:'보전 상태',v:'관심 필요(LC)'},{l:'특기',v:'여름에 하면(夏眠)'},{l:'가시 수',v:'약 5,000~7,000개'}], tip:null },
+    { label:'새끼', desc:'태어날 때는 가시가 피부 안에 있어요.', facts:[{l:'출생 시',v:'가시가 피부 속에 있음'},{l:'가시 출현',v:'출생 직후 부드러운 가시 노출'},{l:'새끼 수',v:'1~6마리'},{l:'어미 의존',v:'약 4~6주'}], tip:'아기 고슴도치 가시는 태어날 때 피부 속에 있어요. 출생 직후 수분 만에 나와요!' },
+    { label:'어린', desc:'위험하면 몸을 공처럼 말아요.', facts:[{l:'방어 자세',v:'몸을 공 모양으로 말기'},{l:'가시 성분',v:'케라틴(손톱과 같은 성분)'},{l:'재생',v:'빠진 가시는 다시 자람'},{l:'스트레스',v:'스트레스 받으면 가시 빠짐'}], tip:'고슴도치 가시는 빠져도 다시 자라요! 하지만 스트레스를 받으면 많이 빠져요.' },
+    { label:'청소년', desc:'독 전갈도 먹는 담대한 사냥꾼이에요.', facts:[{l:'먹이',v:'곤충·전갈·지네·작은 뱀'},{l:'독 내성',v:'일부 독에 내성 있음'},{l:'물 없이 생존',v:'먹이에서 수분 보충'},{l:'야행성',v:'밤에만 활동'}], tip:'피그미고슴도치는 독 전갈도 먹어요! 독소에 어느 정도 내성이 있어요.' },
+    { label:'성체', desc:'완전히 자란 피그미고슴도치예요.', facts:[{l:'몸무게',v:'약 400~700g'},{l:'몸 길이',v:'약 14~23cm'},{l:'수명',v:'야생 약 3~4년'},{l:'하면(夏眠)',v:'여름 극한더위에 잠자기'}], tip:'고슴도치를 애완동물로 키우고 싶다면 합법 사육 개체를 입양하는 게 중요해요.' }
+  ]},
+  { e:'🦡', ko:'유럽오소리', stages:[
+    { label:'알', desc:'수백 년 이어지는 거대한 굴(세트)을 만들고 대가족이 살아요.', facts:[{l:'서식지',v:'유럽·아시아 온대 숲'},{l:'보전 상태',v:'관심 필요(LC)'},{l:'굴(세트)',v:'세대를 이어 수백 년 사용'},{l:'위생',v:'침실 이부자리 풀 주기적 교체'}], tip:null },
+    { label:'새끼', desc:'겨울에 굴 속에서 태어나요.', facts:[{l:'출생 시기',v:'1~2월(겨울 굴 속)'},{l:'눈 뜨는 시기',v:'생후 약 5주'},{l:'독립 시기',v:'약 1년'},{l:'무리 육아',v:'무리 암컷들이 함께 돌봄'}], tip:'오소리는 겨울잠을 자는 건 아니에요. 굴 속에서 움직임을 줄이며 지내요.' },
+    { label:'어린', desc:'지렁이를 하루 200마리 이상 먹어요.', facts:[{l:'주 먹이',v:'지렁이(하루 200마리 이상)'},{l:'진동 감지',v:'땅 속 지렁이 위치 감지'},{l:'잡식성',v:'계절마다 다른 먹이'},{l:'생태 효과',v:'굴이 토양을 비옥하게 함'}], tip:'오소리 굴이 토양을 비옥하게 해 지렁이도 많이 살아요!' },
+    { label:'청소년', desc:'굴(세트)은 방이 수십 개이고 출구가 여러 개예요.', facts:[{l:'굴 깊이',v:'최대 3m'},{l:'굴 길이',v:'최대 100m 이상'},{l:'방 개수',v:'수십 개'},{l:'위생',v:'굴 밖에만 배변'}], tip:'오소리는 침실에 깔아둔 풀을 주기적으로 교체해요. 놀라운 위생 관리예요!' },
+    { label:'성체', desc:'완전히 자란 유럽오소리예요.', facts:[{l:'몸무게',v:'최대 17kg'},{l:'수명',v:'야생 약 14년'},{l:'사회 구조',v:'2~20마리 무리 생활'},{l:'생태 역할',v:'숲 토양 건강 유지'}], tip:'오소리가 사라지면 그 숲 생태계 전체가 흔들려요. 보이지 않는 곳에서 숲을 지켜요.' }
+  ]},
+  { e:'🦙', ko:'비쿠냐', stages:[
+    { label:'알', desc:'비쿠냐 털은 세계에서 가장 비싼 섬유예요.', facts:[{l:'서식지',v:'안데스 산맥 해발 3,500~5,500m'},{l:'보전 상태',v:'관심 필요(LC)'},{l:'털 가격',v:'1kg당 약 500만 원'},{l:'복원 성과',v:'6,000마리→350,000마리'}], tip:null },
+    { label:'새끼', desc:'태어나자마자 일어서서 어미를 따라다녀요.', facts:[{l:'기립 시간',v:'출생 직후'},{l:'털 특성',v:'직경 12마이크론'},{l:'고도 적응',v:'해발 5,500m에서도 생존'},{l:'무리 생활',v:'암컷+새끼 무리'}], tip:'비쿠냐 털은 직경 12마이크론으로 인간 머리카락의 1/7 두께예요. 세상에서 가장 부드러워요.' },
+    { label:'어린', desc:'타원형 적혈구 덕분에 고산에서도 숨이 차지 않아요.', facts:[{l:'먹이',v:'고산 풀·관목'},{l:'소화',v:'반추동물(되새김 가능)'},{l:'적혈구',v:'타원형이라 산소 운반 효율적'},{l:'체온',v:'38~39°C 유지'}], tip:'비쿠냐의 타원형 적혈구 덕분에 고산에서도 숨이 차지 않아요!' },
+    { label:'청소년', desc:'잉카 문명 때부터 신성한 동물로 여겨졌어요.', facts:[{l:'잉카 의식',v:'차쿠: 무리지어 몰아 털 깎기'},{l:'신성 동물',v:'잉카에서 태양신의 동물'},{l:'페루 국장',v:'페루 국가 문장에 등장'},{l:'털 활용',v:'2~3년마다 한 번 깎음'}], tip:'비쿠냐는 페루 국가 문장에 등장해요. 안데스 문화와 자연이 함께 녹아 있는 동물이에요.' },
+    { label:'성체', desc:'6,000마리에서 350,000마리로 회복된 기적이에요!', facts:[{l:'몸무게',v:'약 35~65kg'},{l:'수명',v:'야생 약 15~20년'},{l:'현재 개체 수',v:'약 350,000마리(2024)'},{l:'복원 방법',v:'국제 협력 보전·지역민 참여'}], tip:'비쿠냐는 국제 협력 보전으로 기적적으로 회복된 사례예요!' }
+  ]},
+  { e:'🦉', ko:'올빼미', stages:[
+    { label:'알', desc:'침묵의 사냥꾼, 올빼미예요. 목을 270°까지 회전할 수 있어요.', facts:[{l:'서식지',v:'전 세계(남극 제외)'},{l:'보전 상태',v:'종마다 다름'},{l:'목 회전',v:'270°까지 회전 가능'},{l:'눈',v:'움직이지 않아 목으로 방향 전환'}], tip:null },
+    { label:'새끼', desc:'먼저 태어난 새끼가 더 잘 먹어요.', facts:[{l:'솜털',v:'태어날 때 흰색 솜털'},{l:'눈',v:'처음엔 파란 눈'},{l:'어미 육아',v:'수컷이 먹이 가져오면 어미가 분배'},{l:'특기',v:'날개 보조 등반'}], tip:'아기 올빼미는 날개를 이용해 기어오르기도 해요. "날개 보조 등반"이에요!' },
+    { label:'어린', desc:'비대칭 귀로 어둠 속에서도 먹이 위치를 파악해요.', facts:[{l:'귀 위치',v:'일부 종은 비대칭 귀'},{l:'청각',v:'어둠 속에서도 쥐 위치 정확 파악'},{l:'깃털',v:'소리 없이 나는 특수 깃털 구조'},{l:'야간 시력',v:'인간의 100배'}], tip:'올빼미 날갯깃에는 톱날 모양 미세 구조가 있어요. 공기를 조용히 가르기 때문에 먹이가 알아채지 못해요!' },
+    { label:'청소년', desc:'소화 못 한 뼈·털을 펠릿으로 토해내요.', facts:[{l:'펠릿',v:'소화 못한 뼈·털을 압축해 토함'},{l:'연구 활용',v:'펠릿 분석으로 먹이 파악'},{l:'영역',v:'수컷이 울음으로 영역 표시'},{l:'먹이',v:'쥐·토끼·곤충·물고기'}], tip:'올빼미 펠릿을 해부하면 무엇을 먹었는지 알 수 있어요. 생태계 연구의 훌륭한 자료예요!' },
+    { label:'성체', desc:'완전히 자란 올빼미예요. 쥐를 잡아먹어 농작물을 보호해요.', facts:[{l:'생태 역할',v:'쥐 개체 수 조절'},{l:'경제 효과',v:'한 쌍이 연간 쥐 3,000마리 이상 포획'},{l:'수명',v:'종마다 10~25년'},{l:'위협 요인',v:'서식지 파괴·쥐약 간접 중독'}], tip:'쥐약 대신 올빼미 집(owl box)을 설치하면 쥐가 자연스럽게 줄어요!' }
+  ]},
+  { e:'🐸', ko:'황금독화살개구리', stages:[
+    { label:'알', desc:'세계에서 가장 독성이 강한 동물 중 하나예요.', facts:[{l:'서식지',v:'콜롬비아 태평양 연안 열대우림'},{l:'보전 상태',v:'멸종위기(EN)'},{l:'독성',v:'뱀 독보다 1,200배 강함'},{l:'독의 출처',v:'야생 특정 개미·진드기 섭취'}], tip:null },
+    { label:'새끼', desc:'아버지가 알을 지키고 올챙이를 등에 업어 이동해요.', facts:[{l:'알 보호',v:'아버지가 알 지킴'},{l:'올챙이 이동',v:'아버지가 등에 업어 운반'},{l:'어미 식량',v:'어미가 무정란을 낳아 올챙이에게 먹임'},{l:'성장 기간',v:'약 10~12주'}], tip:'어미 독화살개구리는 올챙이가 먹을 무정란을 낳아줘요. 가장 헌신적인 부모예요!' },
+    { label:'어린', desc:'사육 상태에서는 독이 없어요. 야생 곤충에서 독을 얻기 때문이에요.', facts:[{l:'사육 상태',v:'독 없음(먹이 차이)'},{l:'경고색',v:'밝은 노랑·주황이 "독 있다" 신호'},{l:'크기',v:'약 5.5cm'},{l:'생태 연구',v:'독소 연구로 진통제 개발 중'}], tip:'사육 황금독화살개구리는 독이 없어요. 환경이 동물을 만들어요!' },
+    { label:'청소년', desc:'콜롬비아의 딱 한 지역 열대우림에서만 살아요.', facts:[{l:'서식지 특이성',v:'콜롬비아 특정 열대우림만'},{l:'온도 요구',v:'26°C·습도 80% 이상'},{l:'수컷 울음',v:'영역 표시용 울음'},{l:'서식지 위협',v:'열대우림 벌채'}], tip:'황금독화살개구리의 서식지는 콜롬비아의 딱 한 지역이에요. 이 숲을 지키는 게 전부예요.' },
+    { label:'성체', desc:'완전히 자란 황금독화살개구리예요.', facts:[{l:'몸무게',v:'약 28g'},{l:'수명',v:'야생 약 10년'},{l:'의학 활용',v:'독소로 진통제 개발 연구 중'},{l:'위협 요인',v:'열대우림 벌채·불법 포획'}], tip:'황금독화살개구리의 독소를 연구해 진통제를 개발하려는 과학자들이 있어요. 생물 다양성이 의학의 보물창고예요!' }
+  ]}
+];
+
+const STAGE_DEF = [
+  { label:'알',    cls:'s0', unlockAt:0  },
+  { label:'새끼',  cls:'s1', unlockAt:1  },
+  { label:'어린',  cls:'s2', unlockAt:7  },
+  { label:'청소년',cls:'s3', unlockAt:16 },
+  { label:'성체',  cls:'s4', unlockAt:25 }
+];
+
+function getStageIdx(cnt) {
+  if (cnt===0) return 0; if (cnt<=6) return 1;
+  if (cnt<=15) return 2; if (cnt<=24) return 3; return 4;
+}
+function getDisplayEmoji(ai, si) {
+  if (si===0) return '🥚'; if (si===1) return '🐣'; return ANIMALS[ai].e;
+}
+
+/* ════════════════════════════════════
+   앱 상태
+════════════════════════════════════ */
+let me = null, stuData = null, tEditTarget = null, confirmResolveFn = null, currentDexTab = 0;
+
+/* ════════════════════════════════════
+   별 배경
+════════════════════════════════════ */
+(function(){
+  const c=document.getElementById('starfield');
+  for(let i=0;i<75;i++){
+    const s=document.createElement('div'); s.className='star';
+    const sz=Math.random()*2+.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*.55+.15};animation:floatY ${2+Math.random()*3}s ${Math.random()*4}s ease-in-out infinite`;
+    c.appendChild(s);
+  }
+})();
+
+/* ════════════════════════════════════
+   유틸
+════════════════════════════════════ */
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showToast(msg,bg='#27ae60'){const t=document.getElementById('toast');t.textContent=msg;t.style.background=bg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+function openOverlay(id){document.getElementById(id).classList.add('open');}
+function closeOverlay(id){document.getElementById(id).classList.remove('open');}
+function myConfirm(msg,okLabel='확인',danger=true){
+  return new Promise(r=>{
+    document.getElementById('confirmMsg').textContent=msg;
+    const ok=document.getElementById('confirmOkBtn');
+    ok.textContent=okLabel; ok.style.background=danger?'#c0392b':'#1a7a40'; ok.style.border=`2px solid ${danger?'#e74c3c':'#27ae60'}`;
+    openOverlay('confirmOverlay');
+    confirmResolveFn=v=>{closeOverlay('confirmOverlay');r(v);confirmResolveFn=null;};
+  });
+}
+function resolveConfirm(v){if(confirmResolveFn)confirmResolveFn(v);}
+function todayStr(){return new Date().toISOString().split('T')[0];}
+function getDayNum(s){
+  if(!s.start_date) return 1;
+  const diff=Math.floor((new Date()-new Date(s.start_date))/86400000)+1;
+  return Math.min(Math.max(diff,1),30);
+}
+function hasTodayEntry(entries){return entries.some(e=>e.date===todayStr());}
+function setSt(msg){const el=document.getElementById('storageSt');el.textContent=msg;el.style.opacity='1';setTimeout(()=>el.style.opacity='0',2000);}
+
+/* ════════════════════════════════════
+   로그인
+════════════════════════════════════ */
+async function doLogin(){
+  const numVal=document.getElementById('loginNum').value.trim();
+  const pw=document.getElementById('loginPw').value.trim();
+  const err=document.getElementById('loginErr');
+  const num=parseInt(numVal);
+  if(numVal===''||isNaN(num)||num<0||num>24){err.textContent='❌ 번호는 0~24 사이로 입력해주세요.';return;}
+  if(!/^\d{4}$/.test(pw)){err.textContent='❌ 비밀번호는 숫자 4자리예요.';return;}
+
+  const btn=document.getElementById('loginBtn'); btn.disabled=true; btn.textContent='확인 중...';
+  try {
+    const stu=await getStudent(num);
+    if(!stu){err.textContent='❌ 학생 정보를 찾을 수 없어요.';return;}
+    if(stu.pw!==pw){err.textContent='❌ 비밀번호가 틀렸어요!';return;}
+    err.textContent=''; me=num; stuData=stu;
+    if(!stu.pw_changed){showScreen('pwScreen');return;}
+    if(stu.animal===null){buildAnimalGrid();showScreen('charScreen');return;}
+    renderMain(); showScreen('mainScreen');
+  } catch(e) {
+    err.textContent='❌ 연결 오류가 발생했어요. 잠시 후 다시 시도해주세요.';
+  } finally {
+    btn.disabled=false; btn.textContent='로그인';
+  }
+}
+document.getElementById('loginNum').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('loginPw').focus();});
+document.getElementById('loginPw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+async function doTeacherLogin(){
+  const pw=document.getElementById('teacherPw').value;
+  if(pw!==TEACHER_PW){document.getElementById('teacherErr').textContent='❌ 비밀번호가 틀렸어요.';return;}
+  document.getElementById('teacherErr').textContent='';
+  closeOverlay('teacherLoginOverlay'); me='teacher';
+  await renderTeacher(); showScreen('teacherScreen');
+}
+document.getElementById('teacherPw').addEventListener('keydown',e=>{if(e.key==='Enter')doTeacherLogin();});
+
+function doLogout(){
+  me=null; stuData=null;
+  document.getElementById('loginNum').value='';
+  document.getElementById('loginPw').value='';
+  document.getElementById('loginErr').textContent='';
+  document.getElementById('pnutBox').classList.remove('show');
+  showScreen('loginScreen');
+}
+
+/* ════════════════════════════════════
+   비밀번호 변경
+════════════════════════════════════ */
+async function doPwChange(){
+  const p1=document.getElementById('newPw1').value.trim();
+  const p2=document.getElementById('newPw2').value.trim();
+  const err=document.getElementById('pwErr');
+  if(!/^\d{4}$/.test(p1)){err.textContent='❌ 숫자 4자리를 입력해주세요.';return;}
+  if(p1==='0000'){err.textContent='❌ 0000 이외의 번호로 바꿔주세요.';return;}
+  if(p1!==p2){err.textContent='❌ 비밀번호가 서로 달라요.';return;}
+  await updateStudent(me,{pw:p1,pw_changed:true});
+  stuData.pw=p1; stuData.pw_changed=true;
+  showToast('비밀번호 변경 완료! 🔐');
+  setTimeout(()=>{if(stuData.animal===null){buildAnimalGrid();showScreen('charScreen');}else{renderMain();showScreen('mainScreen');}},400);
+}
+
+/* ════════════════════════════════════
+   동물 선택
+════════════════════════════════════ */
+let selectedAnimal=null;
+function buildAnimalGrid(){
+  const grid=document.getElementById('animalGrid'); grid.innerHTML=''; selectedAnimal=null;
+  document.getElementById('selectBtn').disabled=true;
+  ANIMALS.forEach((a,i)=>{
+    const card=document.createElement('div'); card.className='a-card';
+    card.innerHTML=`<span class="a-emoji">${a.e}</span><div class="a-name">${a.ko}</div>`;
+    card.onclick=()=>{document.querySelectorAll('.a-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');selectedAnimal=i;document.getElementById('selectBtn').disabled=false;};
+    grid.appendChild(card);
+  });
+}
+async function doSelectAnimal(){
+  if(selectedAnimal===null) return;
+  await updateStudent(me,{animal:selectedAnimal,start_date:todayStr()});
+  stuData.animal=selectedAnimal; stuData.start_date=todayStr();
+  showToast(`${ANIMALS[selectedAnimal].ko}(으)로 시작해요! 🌱`);
+  setTimeout(()=>{renderMain();showScreen('mainScreen');},400);
+}
+
+/* ════════════════════════════════════
+   메인 화면
+════════════════════════════════════ */
+function renderMain(){
+  const s=stuData; const a=ANIMALS[s.animal];
+  const cnt=s.entries.length; const stIdx=getStageIdx(cnt); const st=STAGE_DEF[stIdx];
+  const done=hasTodayEntry(s.entries);
+
+  document.getElementById('stuBadge').textContent=`${me}번`;
+  document.getElementById('dayBadge').textContent=`📅 ${getDayNum(s)}일차`;
+  const emoji=document.getElementById('animalEmoji');
+  emoji.className=`animal-emoji ${st.cls}`;
+  emoji.textContent=getDisplayEmoji(s.animal,stIdx);
+  document.getElementById('stageLbl').textContent=st.label;
+  document.getElementById('charName').textContent=a.ko;
+  document.getElementById('charProgressTxt').textContent=cnt>=30?'30번 완주! 완전히 성장했어요 🏆':cnt===0?'첫 실천을 기다리고 있어요 🌱':`${cnt}회 완료 · ${st.label} 단계`;
+  document.getElementById('ringArc').style.strokeDashoffset=351.9-(351.9*cnt/30);
+  document.getElementById('progFill').style.width=Math.round(cnt/30*100)+'%';
+  document.getElementById('progLbl').textContent=`${cnt} / 30회`;
+  document.getElementById('doneBanner').style.display=done?'flex':'none';
+  document.getElementById('challengeCard').style.display=done?'none':'block';
+  currentDexTab=stIdx;
+  renderDexTabs(s.animal,cnt);
+  renderDexPanel(s.animal,stIdx);
+  renderHistory(s.entries);
+}
+
+function renderDexTabs(ai,cnt){
+  document.getElementById('dexTabs').innerHTML=STAGE_DEF.map((st,i)=>{
+    const unlocked=cnt>=st.unlockAt; const active=i===currentDexTab;
+    return `<button class="dex-tab${active?' active':''}" ${!unlocked?'disabled':''} onclick="switchDexTab(${ai},${i},${cnt})">${getDisplayEmoji(ai,i)} ${st.label}</button>`;
+  }).join('');
+}
+
+function switchDexTab(ai,tabIdx,cnt){
+  if(cnt<STAGE_DEF[tabIdx].unlockAt){showToast('더 실천해서 해금해요 🔒','#e17055');return;}
+  currentDexTab=tabIdx; renderDexTabs(ai,cnt); renderDexPanel(ai,tabIdx);
+}
+
+function renderDexPanel(ai,tabIdx){
+  const stage=ANIMALS[ai].stages[tabIdx];
+  document.getElementById('dexPanel').innerHTML=`
+    <div class="dex-desc">${stage.desc}</div>
+    <div class="dex-facts">${stage.facts.map(f=>`<div class="dex-fact"><div class="dex-fact-lbl">${f.l}</div><div class="dex-fact-val">${f.v}</div></div>`).join('')}</div>
+    ${stage.tip?`<div class="dex-tip"><div class="dex-tip-lbl">알고 있었나요?</div><div class="dex-tip-txt">${stage.tip}</div></div>`:''}
+  `;
+}
+
+function renderHistory(entries){
+  const el=document.getElementById('histList');
+  if(!entries.length){el.innerHTML='<div style="text-align:center;padding:.9rem;color:rgba(255,255,255,.38);font-size:12px">아직 기록이 없어요. 첫 실천을 입력해봐요!</div>';return;}
+  el.innerHTML=[...entries].reverse().slice(0,5).map(e=>`<div class="hist-item"><span class="hist-day">${e.day}일</span><div><div class="hist-txt">${e.content}</div><div class="hist-date">${e.date}</div></div></div>`).join('');
+}
+
+/* ════════════════════════════════════
+   실천 제출
+════════════════════════════════════ */
+async function doSubmit(){
+  const input=document.getElementById('chalInput'); const txt=input.value.trim();
+  if(!txt){showToast('실천 내용을 입력해주세요! 🌿','#e17055');return;}
+  const btn=document.getElementById('submitBtn'); btn.disabled=true;
+  const pnutBox=document.getElementById('pnutBox'); const pnutContent=document.getElementById('pnutContent');
+  pnutBox.classList.add('show');
+  pnutContent.innerHTML=`<div class="loading-anim">땅콩이가 생각하는 중이에요<span class="dots-wrap"><span></span><span></span><span></span></span></div>`;
+  pnutBox.scrollIntoView({behavior:'smooth',block:'start'});
+  const a=ANIMALS[stuData.animal];
+
+  try {
+    const res=await fetch('/.netlify/functions/peanut',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({animalName:a.ko,animalEmoji:a.e,action:txt})
+    });
+    const parsed=await res.json();
+    pnutContent.innerHTML=`
+      <div class="pnut-sec p1"><div class="pnut-lbl">🌟 칭찬해요!</div><p>${parsed.praise}</p></div>
+      <div class="pnut-sec p2"><div class="pnut-lbl">🔬 알고 있었나요?</div><p>${parsed.science}</p></div>
+      <div class="pnut-sec p3"><div class="pnut-lbl">💚 고마워요</div><p>${parsed.thanks}</p></div>
+    `;
+  } catch(e) {
+    pnutContent.innerHTML=`
+      <div class="pnut-sec p1"><div class="pnut-lbl">🌟 칭찬해요!</div><p>정말 훌륭한 실천이에요! 매일 이렇게 행동하면 지구가 기뻐해요! 🌱</p></div>
+      <div class="pnut-sec p2"><div class="pnut-lbl">🔬 알고 있었나요?</div><p>작은 실천 하나하나가 모여 지구 온도를 낮추는 데 큰 도움이 돼요!</p></div>
+      <div class="pnut-sec p3"><div class="pnut-lbl">💚 고마워요</div><p>네 덕분에 ${a.ko} 친구들이 더 오래 살 수 있어요. 고마워요! 💚</p></div>
+    `;
+  }
+
+  const newEntry={day:getDayNum(stuData),date:todayStr(),content:txt};
+  stuData.entries=[...stuData.entries,newEntry];
+  await updateStudent(me,{entries:stuData.entries});
+  setSt('💾 저장됨');
+  input.value=''; btn.disabled=false;
+  setTimeout(()=>renderMain(),200);
+  showToast(`🥜 ${a.ko}이(가) 조금 더 자랐어요!`);
+}
+document.getElementById('chalInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey)doSubmit();});
+
+/* ════════════════════════════════════
+   지구 화면
+════════════════════════════════════ */
+async function goGlobe(){
+  const grid=document.getElementById('globeGrid'); grid.innerHTML='<div style="text-align:center;padding:2rem;color:rgba(255,255,255,.4);font-size:12px">로딩 중...</div>';
+  showScreen('globeScreen');
+  const all=await getAllStudents();
+  grid.innerHTML='';
+  all.forEach(stu=>{
+    const hasA=stu.animal!==null; const a=hasA?ANIMALS[stu.animal]:null;
+    const cnt=stu.entries.length; const isMe=stu.id===me;
+    const stIdx=hasA?getStageIdx(cnt):0;
+    const card=document.createElement('div');
+    card.className=`ga-card${isMe?' is-me':''}${cnt>0?' has-entries':''}`;
+    card.innerHTML=`${cnt>0?`<div class="ga-count">${cnt}</div>`:''}${hasA?`<span class="ga-emoji">${getDisplayEmoji(stu.animal,stIdx)}</span>`:'<span class="ga-emoji" style="opacity:.3">❓</span>'}<div class="ga-num">${stu.id}번${isMe?' 👈':''}</div>`;
+    if(hasA) card.onclick=()=>showStudentDetail(stu);
+    grid.appendChild(card);
+  });
+}
+function goBack(){
+  if(me==='teacher'){showScreen('teacherScreen');}
+  else{renderMain();showScreen('mainScreen');}
+}
+function showStudentDetail(stu){
+  const a=ANIMALS[stu.animal];
+  document.getElementById('detEmoji').textContent=a.e;
+  document.getElementById('detName').textContent=`${stu.id}번 · ${a.ko}`;
+  document.getElementById('detSub').textContent=`실천 ${stu.entries.length}회`;
+  const el=document.getElementById('detEntries');
+  el.innerHTML=stu.entries.length===0?'<div class="no-entry">📝 아직 기록이 없어요</div>':[...stu.entries].reverse().map(e=>`<div class="entry-item"><div class="entry-day">${e.day}일차</div><div class="entry-txt">${e.content}</div><div class="entry-dt">${e.date}</div></div>`).join('');
+  openOverlay('detailOverlay');
+}
+function closeDetailOnBg(e){if(e.target===document.getElementById('detailOverlay'))closeOverlay('detailOverlay');}
+
+/* ════════════════════════════════════
+   교사 화면
+════════════════════════════════════ */
+async function renderTeacher(){
+  document.getElementById('statsRow').innerHTML='<div style="text-align:center;padding:1rem;color:rgba(255,255,255,.4);font-size:12px;grid-column:1/-1">로딩 중...</div>';
+  document.getElementById('studentList').innerHTML='';
+  const all=await getAllStudents();
+  const total=all.filter(s=>s.animal!==null).length;
+  const totalE=all.reduce((acc,s)=>acc+s.entries.length,0);
+  const today=todayStr();
+  const todayA=all.filter(s=>s.entries.some(e=>e.date===today)).length;
+  document.getElementById('statsRow').innerHTML=`
+    <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-lbl">동물 선택 완료</div></div>
+    <div class="stat-box"><div class="stat-num">${totalE}</div><div class="stat-lbl">전체 실천 횟수</div></div>
+    <div class="stat-box"><div class="stat-num">${todayA}</div><div class="stat-lbl">오늘 참여 학생</div></div>
+  `;
+  const list=document.getElementById('studentList'); list.innerHTML='';
+  all.forEach(stu=>{
+    const a=stu.animal!==null?ANIMALS[stu.animal]:null;
+    const row=document.createElement('div'); row.className='stu-row';
+    row.innerHTML=`<span class="stu-emoji">${a?a.e:'❓'}</span><div class="stu-info"><div class="stu-name">${stu.id}번 · ${a?a.ko:'(미선택)'}</div><div class="stu-sub">실천 ${stu.entries.length}회 | 비번: ${stu.pw_changed?'변경됨':'기본 0000'}</div></div><div class="stu-actions"><button class="act-btn reset" onclick="tResetPw(${stu.id})">비번초기화</button><button class="act-btn edit" onclick="tEditEntries(${stu.id})">기록편집</button><button class="act-btn del" onclick="tDeleteStudent(${stu.id})">초기화</button></div>`;
+    list.appendChild(row);
+  });
+}
+async function tResetPw(num){
+  const ok=await myConfirm(`${num}번 학생의 비밀번호를 0000으로 초기화할까요?`,'초기화',false);
+  if(!ok) return;
+  await updateStudent(num,{pw:'0000',pw_changed:false});
+  showToast(`${num}번 비밀번호 → 0000`,'#f9ca24');
+  await renderTeacher();
+}
+async function tDeleteStudent(num){
+  const ok=await myConfirm(`${num}번 학생의 모든 데이터를 초기화할까요?\n동물 선택과 실천 기록이 모두 삭제됩니다.`,'삭제',true);
+  if(!ok) return;
+  await updateStudent(num,{pw:'0000',pw_changed:false,animal:null,entries:[],start_date:null});
+  showToast(`${num}번 데이터가 초기화됐어요.`,'#ff7675');
+  await renderTeacher();
+}
+async function tEditEntries(num){
+  tEditTarget=num;
+  const stu=await getStudent(num);
+  const a=stu.animal!==null?ANIMALS[stu.animal]:null;
+  document.getElementById('tEditEmoji').textContent=a?a.e:'❓';
+  document.getElementById('tEditName').textContent=`${num}번 · ${a?a.ko:'(미선택)'}`;
+  document.getElementById('tAddInput').value='';
+  renderTEditEntries(stu); openOverlay('tEditOverlay');
+}
+function renderTEditEntries(stu){
+  document.getElementById('tEditSub').textContent=`실천 ${stu.entries.length}회`;
+  const el=document.getElementById('tEditEntries');
+  el.innerHTML=stu.entries.length===0?'<div style="padding:.7rem;font-size:12px;color:rgba(255,255,255,.38)">실천 기록이 없어요.</div>':stu.entries.map((e,i)=>`<div class="edit-entry-item"><div class="edit-entry-txt"><span style="color:#6ee7a0;font-size:9px;font-weight:700;margin-right:4px">${e.day}일차</span>${e.content}<div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:1px">${e.date}</div></div><button class="del-entry-btn" onclick="tDelEntry(${tEditTarget},${i})">삭제</button></div>`).join('');
+}
+async function tDelEntry(num,idx){
+  const ok=await myConfirm('이 실천 기록을 삭제할까요?','삭제',true);
+  if(!ok) return;
+  const stu=await getStudent(num);
+  stu.entries.splice(idx,1);
+  await updateStudent(num,{entries:stu.entries});
+  renderTEditEntries(stu); await renderTeacher(); showToast('기록이 삭제됐어요.','#ff7675');
+}
+async function tAddEntry(){
+  const txt=document.getElementById('tAddInput').value.trim();
+  if(!txt){showToast('내용을 입력해주세요.','#e17055');return;}
+  const stu=await getStudent(tEditTarget);
+  stu.entries.push({day:getDayNum(stu)||1,date:todayStr(),content:txt});
+  await updateStudent(tEditTarget,{entries:stu.entries});
+  document.getElementById('tAddInput').value='';
+  renderTEditEntries(stu); await renderTeacher(); showToast('기록이 추가됐어요! ✅');
+}
+function closeTEditOnBg(e){if(e.target===document.getElementById('tEditOverlay'))closeOverlay('tEditOverlay');}
+
+/* ════════════════════════════════════
+   앱 시작
+════════════════════════════════════ */
+(function init(){
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=false; btn.textContent='로그인';
+  setSt('✅ 준비됨');
+})();
+</script>
+</body>
+</html>
